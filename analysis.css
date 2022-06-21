@@ -1,0 +1,26 @@
+meter {
+    width: 100%;
+}
+
+body {
+    padding: 10px 5px;
+}
+
+.section {
+    margin: 15px 0px;
+}
+
+.description {
+    margin: 0px 5px;
+}
+
+.etiquette-each {
+    border-style: dotted;
+    margin: 2px 4px;
+    border-radius: 25px;
+    padding: 2px;
+}
+
+.etiquette-sentence{
+    margin-right:10px
+}

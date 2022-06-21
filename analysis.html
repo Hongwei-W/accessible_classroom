@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis</title>
+    <link rel="stylesheet" href="analysis.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <!-- font-awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+</head>
+
+<body>
+<div class="container-fluid">
+
+    <div class="row section">
+        <div class="row">
+            <div class="col">Your Real-time Volume & Speech Speed</div>
+        </div>
+        <div class="row" id="instant">
+            <div class="col-4">Volume</div>
+            <div class="col-6">
+                <meter high="0.25" max="1" value="0"></meter>
+            </div>
+            <div class="value col text-end"></div>
+        </div>
+        <div class="row">
+            <div class="col-4">Speech Speed</div>
+            <div class="col-6">
+                <meter high="0.25" max="1" value="0"></meter>
+            </div>
+            <div class="value col text-end"></div>
+        </div>
+    </div>
+    <div class="row section">
+        <div class="row">
+            <div class="col">Enable Loopback</div>
+        </div>
+        <audio id="player"></audio>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-6 text-end">
+                <span class="description">Disable</span>
+                <i id="loopback-toggle" class="fa-solid fa-toggle-off text-end"></i>
+                <span class="description">Enable</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row section">
+        <div class="row">
+            <div class="col">
+                Notify current/all presenter(s)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 text-end offset-4">
+                Please <a href="">speak louder</a> <a href="">speak slower</a> <a href="">customise msg</a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row section admin">
+        <div class="row">
+            <div class="col">Notify the participant to speak out when he/she start tying in chat</div>
+        </div>
+        <div class="row">
+            <div class="col-6"></div>
+            <div class="col-6 text-end">
+                <span class="description">Do not notify</span>
+                <i id="chat-toggle" class="fa-solid fa-toggle-off text-end"></i>
+                <span class="description">Notify</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row section admin">
+        <div class="row">
+            <div class="col">Usage of Voice V.S. Keyboard</div>
+        </div>
+        <div class="row">
+            <div class="col-4 text-end">Voice</div>
+            <div class="col-6">
+                <meter id="usage" high="0.25" max="1" value="0"></meter>
+            </div>
+            <div class="col-2">
+                Keyboard
+            </div>
+        </div>
+    </div>
+
+    <div class="row section admin">
+        <div class="row">
+            <div class="col">Speaking Frequency (refresh every 20 seconds)</div>
+        </div>
+        <div class="row">
+            <div class="col-8 offset-4">
+<!--                <div id="app">-->
+<!--                    <graph-bubblecloud-->
+<!--                            :width="500"-->
+<!--                            :height="500"-->
+<!--                            :padding-top="5"-->
+<!--                            :padding-bottom="0"-->
+<!--                            :padding-left="0"-->
+<!--                            :padding-right="0"-->
+<!--                            :values="values"-->
+<!--                            :colors="colors"-->
+<!--                            :styles="styles"-->
+<!--                            :render-interval="0"-->
+<!--                            @click="onClickEvent">-->
+<!--                        <note :text="'Bubble Cloud (Created by luavis)'" :align="'left'"></note>-->
+<!--                    </graph-bubblecloud>-->
+<!--                </div>-->
+                <img src="bubble.png" class="img-fluid">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-8 text-end offset-4">
+                Big bubble for person speaks
+                <span style="color:grey">most</span>
+                <i class="fa-solid fa-toggle-on"></i>
+                <span style="color:black">least</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row section">
+        <div class="row">
+            <div class="col-4">
+                Etiquette
+            </div>
+            <div class="col-8">
+                The participant maybe.../I demand...
+            </div>
+        </div>
+        <div class="row align-items-end">
+            <div class="col-2 text-center">
+                <i class="fa-regular fa-circle-question"></i>
+            </div>
+            <div class="col-2"></div>
+            <div class="col-7">
+                <input type="text" id="input-etiquette" class="input" name="input-etiquette" style="background:transparent; border:none; border-bottom:1px solid #000000;">
+            </div>
+            <div class="col-1">
+                <i class="fa fa-paper-plane" id="submit-etiquette" aria-hidden="true"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row section admin">
+        <div class="row">
+            <div class="col">Incoming Etiquette</div>
+        </div>
+    </div>
+
+    <div class="row section">
+        <div class="row">
+            <div class="col">Approved Etiquette</div>
+        </div>
+        <div class="row">
+<!--            <div class="col-auto etiquette-each">-->
+<!--                <span class="etiquette-sentence">hearing-impaired in meeting</span>-->
+<!--                <i class="fa-regular fa-bell"></i>-->
+<!--                <span class="etiquette-count">5</span>-->
+<!--            </div>-->
+<!--            <div class="col-auto etiquette-each">-->
+<!--                <span class="etiquette-sentence">Speak Slowly</span>-->
+<!--                <i class="fa-regular fa-bell"></i>-->
+<!--                <span class="etiquette-count">3</span>-->
+<!--            </div>-->
+<!--            <div class="col-auto etiquette-each">-->
+<!--                <span class="etiquette-sentence">Use chat (except host)</span>-->
+<!--                <i class="fa-regular fa-bell"></i>-->
+<!--                <span class="etiquette-count">2</span>-->
+<!--            </div>-->
+            <div class="col-10">
+                <img src="etiquette.png" class="img-fluid">
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.12/vue.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="background.js"></script>
+<script src="analysis.js"></script>
+</html>
