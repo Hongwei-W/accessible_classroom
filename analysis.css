@@ -21,6 +21,21 @@ body {
     padding: 2px;
 }
 
+i {
+    margin: 0px 3px;
+}
+
 .etiquette-sentence{
-    margin-right:10px
+    margin-right:10px;
+}
+
+.link-like-text {
+    color: blue;
+    text-decoration: underline;
+}
+
+.text-input {
+    background:transparent;
+    border:none;
+    border-bottom:1px solid #000000;
 }

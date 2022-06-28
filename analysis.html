@@ -54,8 +54,11 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-8 text-end offset-4">
-                Please <a href="">speak louder</a> <a href="">speak slower</a> <a href="">customise msg</a>
+            <div class="col-4" id="msg-submit-status-indication">
+
+            </div>
+            <div class="col-8">
+                Please <span class="link-like-text" id="speak-louder">speak louder</span> <span class="link-like-text" id="speak-slower">speak slower</span> <span class="link-like-text" id="customise-msg">customise msg</span>
             </div>
         </div>
 
@@ -130,17 +133,17 @@
             <div class="col-4">
                 Etiquette
             </div>
-            <div class="col-8">
+            <div class="col-8" id="prompt-etiquette">
                 The participant maybe.../I demand...
             </div>
         </div>
-        <div class="row align-items-end">
+        <div class="row">
             <div class="col-2 text-center">
                 <i class="fa-regular fa-circle-question"></i>
             </div>
             <div class="col-2"></div>
             <div class="col-7">
-                <input type="text" id="input-etiquette" class="input" name="input-etiquette" style="background:transparent; border:none; border-bottom:1px solid #000000;">
+                <input type="text" id="input-etiquette" class="input text-input" name="input-etiquette">
             </div>
             <div class="col-1">
                 <i class="fa fa-paper-plane" id="submit-etiquette" aria-hidden="true"></i>
@@ -152,38 +155,28 @@
         <div class="row">
             <div class="col">Incoming Etiquette</div>
         </div>
+        <div class="row" id="pending-etiquette-row">
+
+        </div>
     </div>
 
     <div class="row section">
         <div class="row">
             <div class="col">Approved Etiquette</div>
         </div>
-        <div class="row">
-<!--            <div class="col-auto etiquette-each">-->
-<!--                <span class="etiquette-sentence">hearing-impaired in meeting</span>-->
-<!--                <i class="fa-regular fa-bell"></i>-->
-<!--                <span class="etiquette-count">5</span>-->
-<!--            </div>-->
-<!--            <div class="col-auto etiquette-each">-->
-<!--                <span class="etiquette-sentence">Speak Slowly</span>-->
-<!--                <i class="fa-regular fa-bell"></i>-->
-<!--                <span class="etiquette-count">3</span>-->
-<!--            </div>-->
-<!--            <div class="col-auto etiquette-each">-->
-<!--                <span class="etiquette-sentence">Use chat (except host)</span>-->
-<!--                <i class="fa-regular fa-bell"></i>-->
-<!--                <span class="etiquette-count">2</span>-->
-<!--            </div>-->
-            <div class="col-10">
-                <img src="etiquette.png" class="img-fluid">
-            </div>
+        <div class="row" id="approved-etiquette-row">
+
         </div>
+    </div>
+
+    <div>
+        <i class="fa fa-paper-plane" id="test" aria-hidden="true"></i>
     </div>
 
 </div>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.12/vue.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.12/vue.js"></script>-->
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
 <script src="background.js"></script>
 <script src="analysis.js"></script>
 </html>
