@@ -14,6 +14,7 @@ function findGetParameter(parameterName) {
 
 const isAdmin = (findGetParameter("admin") === 'true');
 const name = findGetParameter("name");
+const tabId = parseInt(findGetParameter('tabId'));
 
 if (!isAdmin) {
     let admin_elements = document.getElementsByClassName("admin");
@@ -112,10 +113,100 @@ navigator.mediaDevices
     .catch(handleSoundMeterError);
 
 
+const accessible_classroom_system_status =
+    'https://script.google.com/macros/s/AKfycbwIp83wddV0IFmjMS-PznvZQziwWKcGFqTPJKUBrTtlLlC8qcqgbFGuwZfvBbxssGFW/exec';
+
+/* Set "notify speakout" */
+if (isAdmin) {
+// chrome.tabs.sendMessage(tabId, {type: "listener"}, function(response) {
+//     console.log((response.success));
+// });
+    var notifySpeakoutAdmin = false;
+    const chatToggle = document.getElementById("chat-toggle");
+    chatToggle.addEventListener("click", function () {
+        if (notifySpeakoutAdmin) {
+            notifySpeakoutAdmin = false;
+            chatToggle.setAttribute("class", "fa-solid fa-toggle-off");
+            chatSpeakoutNotifySubmissionHandler(false);
+            // chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'off'}, function (response) {
+            //     console.log((response.success));
+            // });
+        } else {
+            notifySpeakoutAdmin = true;
+            chatToggle.setAttribute("class", "fa-solid fa-toggle-on");
+            chatSpeakoutNotifySubmissionHandler(true);
+            // chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'on'}, function (response) {
+            //     console.log((response.success));
+            // });
+        }
+    })
+
+    chatSpeakoutNotifySubmissionHandler(false);
+
+    function chatSpeakoutNotifySubmissionHandler(val) {
+        console.log("submit chat needed to speak out request ");
+
+        var details = {
+            'sheet': "Chat-Speakout-Notify",
+            'setting': val,
+        }
+        let formBody = formEncoding(details);
+
+        postHandler(accessible_classroom_system_status, formBody)
+            .then(function(data){
+                console.log(data);
+            })
+            .catch(function(error) {
+                console.log(error);
+            })
+    }
+}
+
+// no matter if is admin or not
+// TODO uncomment these
+// retrieve_chatSpeakoutNotify = setInterval(function () {
+//     msgRetrieveHandler();
+// }, 1000)
+
+var notifySpeakout = false;
+document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
+    chatSpeakoutNotifyRetrieveHandler();
+})
+
+function chatSpeakoutNotifyRetrieveHandler() {
+    console.log('start retrieve chatSpeakoutNotify setting');
+    let url = accessible_classroom_system_status + '?sheet=Chat-Speakout-Notify';
+    getHandler(url)
+        .then(function(data){
+            if (data.status == 'success') {
+                console.log('setting retrieve from sheet [' + data.setting + ']');
+                console.log('local setting [' + notifySpeakout + ']');
+                if (data.setting == true && notifySpeakout == false) {
+                    console.log('now turning on');
+                    chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'on'}, function (response) {
+                        console.log((response.success));
+                    });
+                    notifySpeakout = true;
+                } else if (data.setting == false && notifySpeakout == true) {
+                    console.log('now turning off');
+                    chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'off'}, function (response) {
+                        console.log((response.success));
+                    });
+                    notifySpeakout = false;
+                }
+            } else {
+               throw "app script gives status=false error";
+            }
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+}
+
 
 /* sound loop back */
 var soundOn = false;
-const toggle = document.getElementById("loopback-toggle");
+const loopbackToggle = document.getElementById("loopback-toggle");
 const player = document.getElementById('player');
 
 console.log("loopback initializing")
@@ -139,14 +230,14 @@ function handleLoopbackError(error) {
 
 navigator.mediaDevices.getUserMedia(constraints).then(handleLoopbackSuccess).catch(handleLoopbackError);
 
-toggle.addEventListener("click", function (){
+loopbackToggle.addEventListener("click", function (){
     if (soundOn) {
         soundOn = false;
-        toggle.setAttribute("class", "fa-solid fa-toggle-off");
+        loopbackToggle.setAttribute("class", "fa-solid fa-toggle-off");
         player.pause();
     } else {
         soundOn = true;
-        toggle.setAttribute("class", "fa-solid fa-toggle-on");
+        loopbackToggle.setAttribute("class", "fa-solid fa-toggle-on");
         player.play();
     }
 })
@@ -273,16 +364,17 @@ function getHandler(url) {
     }).then(response => response.json())
 }
 
-retrieve_etiquette_from_gsheet = setInterval(function () {
-    console.log('get etiquette start');
-    getHandler(accessible_classroom_etiquette_gsheet)
-        .then(function(data){
-        arrange_etiquette(data);
-        })
-        .catch(function(error) {
-            console.log(error);
-        })
-}, 2000)
+// TODO uncomment these
+// retrieve_etiquette_from_gsheet = setInterval(function () {
+//     console.log('get etiquette start');
+//     getHandler(accessible_classroom_etiquette_gsheet)
+//         .then(function(data){
+//         arrange_etiquette(data);
+//         })
+//         .catch(function(error) {
+//             console.log(error);
+//         })
+// }, 2000)
 
 
 function arrange_etiquette(data) {
@@ -443,12 +535,13 @@ function msgSubmissionHandler(msg) {
             submitStatusIndicator(msgSubmitStatusIndicator, statusIndicateMsg);
         })
 }
-//
+// TODO uncomment these
 // retrieve_msg_from_gsheet = setInterval(function () {
 //     msgRetrieveHandler();
 // }, 1000)
 
-document.getElementById("test").addEventListener('click', function (){
+
+document.getElementById('msg').addEventListener('click', function () {
     msgRetrieveHandler();
 })
 
@@ -481,6 +574,7 @@ function arrange_msg(data) {
     if (notifications.length != 0) {
         let notificationsJson = JSON.stringify(notifications);
         chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
+            console.log('msg retrieve ');
             console.log(response.success);
         })
     }

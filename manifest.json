@@ -3,12 +3,15 @@
   "description": "Build an Extension!",
   "version": "1.0",
   "manifest_version": 3,
-  "permissions": ["storage", "activeTab", "scripting", "downloads", "notifications", "<all_urls>"],
+  "permissions": ["storage", "activeTab", "scripting", "downloads", "notifications", "<all_urls>", "tabs"],
   "action": {
     "default_popup": "popup.html"
   },
   "background": {
     "service_worker": "background.js"
-  }
-
+  },
+  "content_scripts": [{
+    "matches": ["*://meet.google.com/*"],
+    "js": ["contentScript.js"]
+  }]
 }

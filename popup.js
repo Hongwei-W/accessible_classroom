@@ -2,15 +2,25 @@ const join_btn = document.getElementById("join_button");
 const admin_btn = document.getElementById("admin_button");
 var login_btn = null;
 var name = null;
+var tabId = null;
+retrieveTabInfo();
 
 join_btn.addEventListener('click', function (){
     if (validateWelcomeForm()) {
         let name = document.forms['welcomeForm']['name'].value;
+        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabId,'result','width=620px, height=700px');
         window.close();
-        window.open('./analysis.html?name='+name+'&admin=false','result','width=620px, height=700px');
-        document.getElementById('welcomeForm').submit();
+        // document.getElementById('welcomeForm').submit();
     }
 })
+
+function retrieveTabInfo() {
+    chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+        var activeTab = tabs[0];
+        console.log("tabID ", activeTab.id);
+        tabId = activeTab.id;
+    });
+}
 
 function validateWelcomeForm() {
     let name = document.forms['welcomeForm']['name'].value;
@@ -48,7 +58,7 @@ admin_btn.addEventListener('click', function() {
     login_btn.addEventListener('click', function (){
         if (validateJoinForm()) {
             window.close();
-            window.open('./analysis.html?name='+name+'&admin=true','result','width=620px, height=700px');
+            window.open('./analysis.html?name='+name+'&admin=true&tabId=' + tabId,'result','width=620px, height=700px');
             document.getElementById('welcomeForm').submit();
         }
     })
