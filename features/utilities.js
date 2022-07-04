@@ -1,3 +1,5 @@
+export {findGetParameter, removeElements};
+
 function findGetParameter(parameterName) {
     var result = null,
         tmp = [];

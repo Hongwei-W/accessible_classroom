@@ -26,7 +26,22 @@ chrome.runtime.onMessage.addListener(
             }
             catch (e){
                 console.log(e);
-                sendResponse({success: false});
+                sendResponse({success: false, error: e});
+            }
+        }
+        else if (request.type == 'initialize') {
+            try {
+                const chatBtn = document.querySelector('[aria-label="Chat with everyone"]')
+                if (document.getElementsByTagName('textarea').length == 0) {
+                    chatBtn.click();
+                }
+                // const newChatBtn = chatBtn.cloneNode(true);
+                chatBtn.parentNode.removeChild(chatBtn);
+                sendResponse({success: true});
+            }
+            catch (e){
+                console.log(e);
+                sendResponse({success: false, error: e});
             }
         }
     }

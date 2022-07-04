@@ -23,6 +23,10 @@ if (!isAdmin) {
     }
 }
 
+chrome.tabs.sendMessage(tabId, {type: "initialize", expectingStatus: 'on'}, function (response) {
+    console.log(response.success);
+});
+
 /* html variables */
 
 const instantMeter = document.querySelector('#instant meter');
@@ -163,15 +167,15 @@ if (isAdmin) {
 }
 
 // no matter if is admin or not
-// TODO uncomment these
-// retrieve_chatSpeakoutNotify = setInterval(function () {
-//     msgRetrieveHandler();
-// }, 1000)
+retrieve_chatSpeakoutNotify = setInterval(function () {
+    chatSpeakoutNotifyRetrieveHandler();
+}, 1000)
 
 var notifySpeakout = false;
-document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
-    chatSpeakoutNotifyRetrieveHandler();
-})
+// use in developing
+// document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
+//     chatSpeakoutNotifyRetrieveHandler();
+// })
 
 function chatSpeakoutNotifyRetrieveHandler() {
     console.log('start retrieve chatSpeakoutNotify setting');
@@ -364,17 +368,16 @@ function getHandler(url) {
     }).then(response => response.json())
 }
 
-// TODO uncomment these
-// retrieve_etiquette_from_gsheet = setInterval(function () {
-//     console.log('get etiquette start');
-//     getHandler(accessible_classroom_etiquette_gsheet)
-//         .then(function(data){
-//         arrange_etiquette(data);
-//         })
-//         .catch(function(error) {
-//             console.log(error);
-//         })
-// }, 2000)
+retrieve_etiquette_from_gsheet = setInterval(function () {
+    console.log('get etiquette start');
+    getHandler(accessible_classroom_etiquette_gsheet)
+        .then(function(data){
+        arrange_etiquette(data);
+        })
+        .catch(function(error) {
+            console.log(error);
+        })
+}, 2000)
 
 
 function arrange_etiquette(data) {
@@ -535,15 +538,15 @@ function msgSubmissionHandler(msg) {
             submitStatusIndicator(msgSubmitStatusIndicator, statusIndicateMsg);
         })
 }
-// TODO uncomment these
-// retrieve_msg_from_gsheet = setInterval(function () {
-//     msgRetrieveHandler();
-// }, 1000)
 
-
-document.getElementById('msg').addEventListener('click', function () {
+retrieve_msg_from_gsheet = setInterval(function () {
     msgRetrieveHandler();
-})
+}, 1000)
+
+// use in developing
+// document.getElementById('msg').addEventListener('click', function () {
+//     msgRetrieveHandler();
+// })
 
 function msgRetrieveHandler() {
     console.log('start retrieve msg');

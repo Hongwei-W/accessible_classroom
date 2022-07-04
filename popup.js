@@ -2,25 +2,46 @@ const join_btn = document.getElementById("join_button");
 const admin_btn = document.getElementById("admin_button");
 var login_btn = null;
 var name = null;
-var tabId = null;
+var tabInfo = new Object();
+const regexpURL = new RegExp("^https*:\/\/meet.google.com\/[a-z]*\-[a-z]*\-[a-z]*");
 retrieveTabInfo();
+
+function retrieveTabInfo() {
+    chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
+        let activeTab = tabs[0];
+        tabInfo['tabId'] = activeTab.id;
+        tabInfo['tabUrl'] = activeTab.url;
+
+        if (!regexpURL.test(tabInfo['tabUrl'])) {notGoogleMeet();}
+    });
+}
+
+function notGoogleMeet() {
+    console.log("not Google Meet");
+    document.getElementsByClassName("container-fluid")[0].remove();
+    let container = document.createElement("div");
+    container.className = "container-fluid";
+    let row = document.createElement("div");
+    row.className = "row";
+    let col1 = document.createElement("div");
+    col1.className = "col-12";
+    col1.innerText = "This is not a Google meet page, please open a google meet page and try again";
+    let col2 = document.createElement("div");
+    col2.className = "col-12";
+    col2.innerText = "This extension only works with google meet page, for now";
+    row.append(col1, col2);
+    container.append(row);
+    document.body.appendChild(container);
+}
 
 join_btn.addEventListener('click', function (){
     if (validateWelcomeForm()) {
         let name = document.forms['welcomeForm']['name'].value;
-        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabId,'result','width=620px, height=700px');
+        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabInfo['tabId'],'result','width=620px, height=700px');
         window.close();
         // document.getElementById('welcomeForm').submit();
     }
 })
-
-function retrieveTabInfo() {
-    chrome.tabs.query({currentWindow: true, active: true}, function (tabs) {
-        var activeTab = tabs[0];
-        console.log("tabID ", activeTab.id);
-        tabId = activeTab.id;
-    });
-}
 
 function validateWelcomeForm() {
     let name = document.forms['welcomeForm']['name'].value;
@@ -58,7 +79,7 @@ admin_btn.addEventListener('click', function() {
     login_btn.addEventListener('click', function (){
         if (validateJoinForm()) {
             window.close();
-            window.open('./analysis.html?name='+name+'&admin=true&tabId=' + tabId,'result','width=620px, height=700px');
+            window.open('./analysis.html?name='+name+'&admin=true&tabId=' + tabInfo['tabId'],'result','width=620px, height=700px');
             document.getElementById('welcomeForm').submit();
         }
     })
