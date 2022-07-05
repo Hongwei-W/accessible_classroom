@@ -285,8 +285,8 @@ console.log("etiquette submission initializing");
 const inputEtiquette = document.getElementById("input-etiquette");
 const submitEtiquette = document.getElementById("submit-etiquette");
 const promptEtiquette = document.getElementById("prompt-etiquette");
-const accessible_classroom_etiquette_gsheet =
-    'https://script.google.com/macros/s/AKfycbyuSO33246tkA66JHx55e1H356Uyth0yqwnOtP3TrSMk0JPMJiVVns_t6eIQyG4_0PK/exec';
+const accessible_classroom_general_gsheet =
+    'https://script.google.com/macros/s/AKfycbwfyLCKN0II0Dfbt7C-GAaAPZjeSysoO0Uu17Lx02lyZEbo1XXptzq3HQZFhKRefobc/exec';
 const pendingEtiquetteRow = document.getElementById("pending-etiquette-row");
 const approvedEtiquetteRow = document.getElementById("approved-etiquette-row");
 
@@ -294,6 +294,7 @@ function etiquetteSubmissionHandler() {
     console.log("submit etiquette by etiquetteSubmissionHandler");
 
     var details = {
+        'sheet': 'etiquette',
         'etiquetteSuggested': inputEtiquette.value,
         'isPending': true,
         'isRejected': false,
@@ -302,7 +303,7 @@ function etiquetteSubmissionHandler() {
     }
     let formBody = formEncoding(details);
 
-    postHandler(accessible_classroom_etiquette_gsheet, formBody)
+    postHandler(accessible_classroom_general_gsheet, formBody)
         .then(function(data){
             console.log(data);
             inputEtiquette.value = '';
@@ -370,7 +371,7 @@ function getHandler(url) {
 
 retrieve_etiquette_from_gsheet = setInterval(function () {
     console.log('get etiquette start');
-    getHandler(accessible_classroom_etiquette_gsheet)
+    getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
         .then(function(data){
         arrange_etiquette(data);
         })
@@ -458,12 +459,13 @@ function clickTickXUpvoteHandler(node, operation) {
     console.log("submit " + operation);
 
     var details = {
+        'sheet': 'etiquette',
         'etiquetteSuggested': inputEtiquette.textContent,
         'operation': operation
     }
     let formBody = formEncoding(details);
 
-    postHandler(accessible_classroom_etiquette_gsheet, formBody)
+    postHandler(accessible_classroom_general_gsheet, formBody)
         .then(function (data) {
             console.log(data);
         })
