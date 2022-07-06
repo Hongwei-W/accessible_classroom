@@ -1,33 +1,19 @@
+import { postHandler, getHandler, formEncoding, accessible_classroom_system_status, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
+import { removeAllChildNodes } from "./features/utilitiesDOM";
+import { findGetParameter, removeElements } from "./features/utilities";
 /* retrieve parameter */
-function findGetParameter(parameterName) {
-    var result = null,
-        tmp = [];
-    location.search
-        .substr(1)
-        .split("&")
-        .forEach(function (item) {
-            tmp = item.split("=");
-            if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-        });
-    return result;
-}
 
 const isAdmin = (findGetParameter("admin") === 'true');
 const name = findGetParameter("name");
 const tabId = parseInt(findGetParameter('tabId'));
 
-if (!isAdmin) {
-    let admin_elements = document.getElementsByClassName("admin");
-    for (var i = admin_elements.length - 1; i >= 0; --i) {
-        admin_elements[i].remove();
-    }
-}
+if (!isAdmin) {removeElements(document.getElementsByClassName("admin"));}
 
 chrome.tabs.sendMessage(tabId, {type: "initialize", expectingStatus: 'on'}, function (response) {
     console.log(response.success);
 });
 
-/* html variables */
+/* sound meter */
 
 const instantMeter = document.querySelector('#instant meter');
 const instantValueDisplay = document.querySelector('#instant .value');
@@ -36,9 +22,6 @@ const constraints = window.constraints = {
     audio: true,
     video: false
 };
-
-
-/* sound meter */
 
 let meterRefresh = null;
 
@@ -117,14 +100,8 @@ navigator.mediaDevices
     .catch(handleSoundMeterError);
 
 
-const accessible_classroom_system_status =
-    'https://script.google.com/macros/s/AKfycbwIp83wddV0IFmjMS-PznvZQziwWKcGFqTPJKUBrTtlLlC8qcqgbFGuwZfvBbxssGFW/exec';
-
 /* Set "notify speakout" */
 if (isAdmin) {
-// chrome.tabs.sendMessage(tabId, {type: "listener"}, function(response) {
-//     console.log((response.success));
-// });
     var notifySpeakoutAdmin = false;
     const chatToggle = document.getElementById("chat-toggle");
     chatToggle.addEventListener("click", function () {
@@ -132,16 +109,10 @@ if (isAdmin) {
             notifySpeakoutAdmin = false;
             chatToggle.setAttribute("class", "fa-solid fa-toggle-off");
             chatSpeakoutNotifySubmissionHandler(false);
-            // chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'off'}, function (response) {
-            //     console.log((response.success));
-            // });
         } else {
             notifySpeakoutAdmin = true;
             chatToggle.setAttribute("class", "fa-solid fa-toggle-on");
             chatSpeakoutNotifySubmissionHandler(true);
-            // chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'on'}, function (response) {
-            //     console.log((response.success));
-            // });
         }
     })
 
@@ -167,7 +138,7 @@ if (isAdmin) {
 }
 
 // no matter if is admin or not
-retrieve_chatSpeakoutNotify = setInterval(function () {
+let retrieve_chatSpeakoutNotify = setInterval(function () {
     chatSpeakoutNotifyRetrieveHandler();
 }, 1000)
 
@@ -285,8 +256,6 @@ console.log("etiquette submission initializing");
 const inputEtiquette = document.getElementById("input-etiquette");
 const submitEtiquette = document.getElementById("submit-etiquette");
 const promptEtiquette = document.getElementById("prompt-etiquette");
-const accessible_classroom_general_gsheet =
-    'https://script.google.com/macros/s/AKfycbwfyLCKN0II0Dfbt7C-GAaAPZjeSysoO0Uu17Lx02lyZEbo1XXptzq3HQZFhKRefobc/exec';
 const pendingEtiquetteRow = document.getElementById("pending-etiquette-row");
 const approvedEtiquetteRow = document.getElementById("approved-etiquette-row");
 
@@ -319,29 +288,6 @@ function etiquetteSubmissionHandler() {
         })
 }
 
-function formEncoding(details) {
-    var formBody = [];
-
-    for (let property in details) {
-        var encodedKey = encodeURIComponent(property);
-        var encodedValue = encodeURIComponent(details[property]);
-        formBody.push(encodedKey + "=" + encodedValue);
-    }
-
-    formBody = formBody.join("&");
-    return formBody;
-}
-
-function postHandler(url, formBody) {
-    return fetch (url, {
-        body: formBody,
-        headers: {
-            'content-type': 'application/x-www-form-urlencoded',
-        },
-        method: 'POST'
-    }).then(response => response.json())
-}
-
 submitEtiquette.addEventListener("click", function() {
     console.log(inputEtiquette.value);
     if (inputEtiquette.value != '') {
@@ -363,13 +309,7 @@ function submitStatusIndicator(node, successMsg) {
 
 /* retrieve etiquette from gsheet */
 
-function getHandler(url) {
-    return fetch (url, {
-        method: 'GET'
-    }).then(response => response.json())
-}
-
-retrieve_etiquette_from_gsheet = setInterval(function () {
+let retrieve_etiquette_from_gsheet = setInterval(function () {
     console.log('get etiquette start');
     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
         .then(function(data){
@@ -445,13 +385,6 @@ function arrange_etiquette(data) {
 
 }
 
-function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
-    }
-}
-
-
 
 function clickTickXUpvoteHandler(node, operation) {
     const div = node.parentNode;
@@ -480,8 +413,6 @@ const speakLouderBtn = document.getElementById('speak-louder');
 const speakSlowerBtn = document.getElementById('speak-slower');
 const customiseMsgBtn = document.getElementById('customise-msg');
 const msgSubmitStatusIndicator = document.getElementById('msg-submit-status-indication');
-const accessible_classroom_message_gsheet =
-    'https://script.google.com/macros/s/AKfycbwoCR3wKZlhQbNN24unWFyAxcOSW_zDXkA4AEVzcccJLDIXFO9KhsjY_p5Xyr7WU2s/exec';
 
 speakLouderBtn.addEventListener('click', function() {
     msgSubmissionHandler("For current speaker: please speak louder");
@@ -541,7 +472,7 @@ function msgSubmissionHandler(msg) {
         })
 }
 
-retrieve_msg_from_gsheet = setInterval(function () {
+let retrieve_msg_from_gsheet = setInterval(function () {
     msgRetrieveHandler();
 }, 1000)
 

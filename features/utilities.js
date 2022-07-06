@@ -1,5 +1,3 @@
-export {findGetParameter, removeElements};
-
 function findGetParameter(parameterName) {
     var result = null,
         tmp = [];
@@ -13,9 +11,11 @@ function findGetParameter(parameterName) {
     return result;
 }
 
-function removeElements() {
-    let admin_elements = document.getElementsByClassName("admin");
+
+function removeElements(admin_elements) {
     for (var i = admin_elements.length - 1; i >= 0; --i) {
         admin_elements[i].remove();
     }
 }
+
+export {findGetParameter, removeElements};
