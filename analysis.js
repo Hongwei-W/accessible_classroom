@@ -1,11 +1,17 @@
 import { postHandler, getHandler, formEncoding, accessible_classroom_system_status, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
-import { removeAllChildNodes } from "./features/utilitiesDOM";
-import { findGetParameter, removeElements } from "./features/utilities";
+import { removeAllChildNodes } from "./features/utilitiesDOM.js";
+import { findGetParameter, removeElements } from "./features/utilities.js";
+import { SoundMeter } from "./features/soundmeter.js";
+import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
+import { Stopwatch } from "./features/stopwatch.js";
+import {speakingDurationRetrieveHandler, startStopwatch, stopStopwatch} from "./features/speakDuration.js";
 /* retrieve parameter */
 
 const isAdmin = (findGetParameter("admin") === 'true');
 const name = findGetParameter("name");
 const tabId = parseInt(findGetParameter('tabId'));
+
+export {name};
 
 if (!isAdmin) {removeElements(document.getElementsByClassName("admin"));}
 
@@ -24,44 +30,8 @@ const constraints = window.constraints = {
 };
 
 let meterRefresh = null;
-
-function SoundMeter(context) {
-    this.context = context;
-    this.instant = 0.0;
-    this.script = context.createScriptProcessor(2048, 1, 1);
-    const that = this;
-    this.script.onaudioprocess = function(event) {
-        const input = event.inputBuffer.getChannelData(0);
-        let i;
-        let sum = 0.0;
-        let clipcount = 0;
-        for (i = 0; i < input.length; ++i) {
-            sum += input[i] * input[i];
-            if (Math.abs(input[i]) > 0.99) {
-                clipcount += 1;
-            }
-        }
-        that.instant = Math.sqrt(sum / input.length);
-    };
-}
-
-SoundMeter.prototype.connectToSource = function(stream, callback) {
-    console.log('SoundMeter connecting');
-    try {
-        this.mic = this.context.createMediaStreamSource(stream);
-        this.mic.connect(this.script);
-        // necessary to make sample run, but should not be.
-        this.script.connect(this.context.destination);
-        if (typeof callback !== 'undefined') {
-            callback(null);
-        }
-    } catch (e) {
-        console.error(e);
-        if (typeof callback !== 'undefined') {
-            callback(e);
-        }
-    }
-};
+let meterStopWatch = null;
+let speaking = false;
 
 function handleSoundMeterSuccess(stream) {
     // Put variables in global scope to make them available to the
@@ -77,6 +47,20 @@ function handleSoundMeterSuccess(stream) {
             instantMeter.value = instantValueDisplay.innerText =
                 soundMeter.instant.toFixed(2);
         }, 200);
+        meterStopWatch = setInterval(() => {
+            let instantVolume = soundMeter.instant.toFixed(2);
+            console.log('instantVolume ' + instantVolume);
+            if (instantVolume > 0.01 && !speaking) {
+                console.log('start stopwatch');
+                speaking = true;
+                startStopwatch();
+            }
+            else if (instantVolume < 0.01 && speaking) {
+                console.log('stop stopwatch');
+                speaking = false;
+                stopStopwatch();
+            }
+        }, 1000);
     });
 }
 
@@ -100,9 +84,12 @@ navigator.mediaDevices
     .catch(handleSoundMeterError);
 
 
-/* Set "notify speakout" */
+
 if (isAdmin) {
-    var notifySpeakoutAdmin = false;
+
+    /* Set "notify speakout" */
+
+    let notifySpeakoutAdmin = false;
     const chatToggle = document.getElementById("chat-toggle");
     chatToggle.addEventListener("click", function () {
         if (notifySpeakoutAdmin) {
@@ -118,69 +105,27 @@ if (isAdmin) {
 
     chatSpeakoutNotifySubmissionHandler(false);
 
-    function chatSpeakoutNotifySubmissionHandler(val) {
-        console.log("submit chat needed to speak out request ");
+    /* retrieve speaking duration */
 
-        var details = {
-            'sheet': "Chat-Speakout-Notify",
-            'setting': val,
-        }
-        let formBody = formEncoding(details);
-
-        postHandler(accessible_classroom_system_status, formBody)
-            .then(function(data){
-                console.log(data);
-            })
-            .catch(function(error) {
-                console.log(error);
-            })
-    }
+    // TODO write a setInterval()
+    document.getElementById('speakingDuration').addEventListener('click', function () {
+        speakingDurationRetrieveHandler();
+    })
 }
 
-// no matter if is admin or not
-let retrieve_chatSpeakoutNotify = setInterval(function () {
-    chatSpeakoutNotifyRetrieveHandler();
-}, 1000)
-
-var notifySpeakout = false;
-// use in developing
-// document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
+// no matter if is admin or not TODO de-comment
+// let retrieve_chatSpeakoutNotify = setInterval(function () {
 //     chatSpeakoutNotifyRetrieveHandler();
-// })
+// }, 1000)
 
-function chatSpeakoutNotifyRetrieveHandler() {
-    console.log('start retrieve chatSpeakoutNotify setting');
-    let url = accessible_classroom_system_status + '?sheet=Chat-Speakout-Notify';
-    getHandler(url)
-        .then(function(data){
-            if (data.status == 'success') {
-                console.log('setting retrieve from sheet [' + data.setting + ']');
-                console.log('local setting [' + notifySpeakout + ']');
-                if (data.setting == true && notifySpeakout == false) {
-                    console.log('now turning on');
-                    chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'on'}, function (response) {
-                        console.log((response.success));
-                    });
-                    notifySpeakout = true;
-                } else if (data.setting == false && notifySpeakout == true) {
-                    console.log('now turning off');
-                    chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'off'}, function (response) {
-                        console.log((response.success));
-                    });
-                    notifySpeakout = false;
-                }
-            } else {
-               throw "app script gives status=false error";
-            }
-        })
-        .catch(function(error) {
-            console.log(error);
-        });
-}
+//use in developing
+document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
+    chatSpeakoutNotifyRetrieveHandler();
+})
 
 
 /* sound loop back */
-var soundOn = false;
+let soundOn = false;
 const loopbackToggle = document.getElementById("loopback-toggle");
 const player = document.getElementById('player');
 
@@ -217,38 +162,6 @@ loopbackToggle.addEventListener("click", function (){
     }
 })
 
-// var vm = new Vue({
-//     el: "#app",
-//     data: {
-//         values: [
-//             [ "/index.jsp", 100, 1000 ],
-//             [ "/home.jsp", 70, 2000 ],
-//             [ "/admin.jsp", 30, 3000 ],
-//             [ "/test/a.jsp", 5, 8000 ],
-//             [ "/test/b.jsp", 50, 5000 ],
-//             [ "/test/c.jsp", 1, 10000 ],
-//             [ "/test/d.jsp", 1, 1000 ]
-//         ],
-//         colors: function(data) {
-//             if (data[2] <= 3000) {
-//                 return '#497eff';
-//             } else if (data[2] <= 7000) {
-//                 return '#ffdd26';
-//             } else {
-//                 return '#ff4f55';
-//             }
-//         },
-//         styles: {
-//             titleFontSize: 15,
-//             titleFontWeight: 'bold'
-//         }
-//     },
-//     methods: {
-//         onClickEvent: function(obj, e) {
-//             console.log(obj.data);
-//         }
-//     }
-// });
 
 /* etiquette submission */
 console.log("etiquette submission initializing");
@@ -262,7 +175,7 @@ const approvedEtiquetteRow = document.getElementById("approved-etiquette-row");
 function etiquetteSubmissionHandler() {
     console.log("submit etiquette by etiquetteSubmissionHandler");
 
-    var details = {
+    let details = {
         'sheet': 'etiquette',
         'etiquetteSuggested': inputEtiquette.value,
         'isPending': true,
@@ -309,8 +222,18 @@ function submitStatusIndicator(node, successMsg) {
 
 /* retrieve etiquette from gsheet */
 
-let retrieve_etiquette_from_gsheet = setInterval(function () {
-    console.log('get etiquette start');
+// let retrieve_etiquette_from_gsheet = setInterval(function () {
+//     console.log('get etiquette start');
+//     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
+//         .then(function(data){
+//         arrange_etiquette(data);
+//         })
+//         .catch(function(error) {
+//             console.log(error);
+//         })
+// }, 2000)
+
+document.getElementById('test').addEventListener('click', function () {
     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
         .then(function(data){
         arrange_etiquette(data);
@@ -318,8 +241,7 @@ let retrieve_etiquette_from_gsheet = setInterval(function () {
         .catch(function(error) {
             console.log(error);
         })
-}, 2000)
-
+})
 
 function arrange_etiquette(data) {
     let pending_list = new Array();
@@ -391,7 +313,7 @@ function clickTickXUpvoteHandler(node, operation) {
     const inputEtiquette = div.querySelector(".etiquette-sentence");
     console.log("submit " + operation);
 
-    var details = {
+    let details = {
         'sheet': 'etiquette',
         'etiquetteSuggested': inputEtiquette.textContent,
         'operation': operation
@@ -454,7 +376,7 @@ customiseMsgBtn.addEventListener('click', function() {
 
 function msgSubmissionHandler(msg) {
     console.log('start submit ' + msg);
-    var details = {
+    let details = {
         'msg': msg
     }
     let formBody = formEncoding(details);
@@ -472,14 +394,15 @@ function msgSubmissionHandler(msg) {
         })
 }
 
-let retrieve_msg_from_gsheet = setInterval(function () {
-    msgRetrieveHandler();
-}, 1000)
-
-// use in developing
-// document.getElementById('msg').addEventListener('click', function () {
+// TODO comment back
+// let retrieve_msg_from_gsheet = setInterval(function () {
 //     msgRetrieveHandler();
-// })
+// }, 1000)
+
+//use in developing
+document.getElementById('msg').addEventListener('click', function () {
+    msgRetrieveHandler();
+})
 
 function msgRetrieveHandler() {
     console.log('start retrieve msg');
@@ -492,7 +415,7 @@ function msgRetrieveHandler() {
         });
 }
 
-var timestemps = new Array();
+let timestemps = new Array();
 
 function arrange_msg(data) {
     let len = data.length;
