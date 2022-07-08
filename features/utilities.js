@@ -18,4 +18,6 @@ function removeElements(admin_elements) {
     }
 }
 
-export {findGetParameter, removeElements};
+let redColors = ["#FFA07A", "#F08080","#FA8072", "#CD5C5C","#B22222", "#8B0000"];
+
+export {findGetParameter, removeElements, redColors};

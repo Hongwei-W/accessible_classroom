@@ -1,6 +1,6 @@
 import { postHandler, getHandler, formEncoding, accessible_classroom_system_status, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
 import { removeAllChildNodes } from "./features/utilitiesDOM.js";
-import { findGetParameter, removeElements } from "./features/utilities.js";
+import {findGetParameter, redColors, removeElements} from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
 import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
 import { Stopwatch } from "./features/stopwatch.js";
@@ -226,7 +226,7 @@ function submitStatusIndicator(node, successMsg) {
 //     console.log('get etiquette start');
 //     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
 //         .then(function(data){
-//         arrange_etiquette(data);
+//         arrangeEtiquette(data);
 //         })
 //         .catch(function(error) {
 //             console.log(error);
@@ -236,14 +236,14 @@ function submitStatusIndicator(node, successMsg) {
 document.getElementById('test').addEventListener('click', function () {
     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
         .then(function(data){
-        arrange_etiquette(data);
+        arrangeEtiquette(data);
         })
         .catch(function(error) {
             console.log(error);
         })
 })
 
-function arrange_etiquette(data) {
+function arrangeEtiquette(data) {
     let pending_list = new Array();
     let approved_list = new Array();
 
@@ -285,10 +285,21 @@ function arrange_etiquette(data) {
 
     removeAllChildNodes(approvedEtiquetteRow);
 
-    for (let i = 0; i < approved_list.length; i++) {
+    let colorCoefficient = Math.ceil(approved_list.length / redColors.length);
+    let reverseCounter = 0;
+    for (let i = approved_list.length-1; i >= 0; i--) {
 
         let col_div = document.createElement("div");
         col_div.className= "col-auto etiquette-each";
+        if (i != approved_list.length-1 && approved_list[i][2] == approved_list[i+1][2]) {
+            col_div.style.color = approvedEtiquetteRow.firstChild.style.color;
+            // colorCoefficient = Math.ceil(i / redColors.length);
+        } else {
+            col_div.style.color = redColors[Math.floor((reverseCounter/colorCoefficient))];
+            // reverseCounter += 1;
+        }
+        reverseCounter += 1;
+
         let span_etiquette = document.createElement("span");
         span_etiquette.className = "etiquette-sentence";
         span_etiquette.textContent = approved_list[i][3];
@@ -299,7 +310,7 @@ function arrange_etiquette(data) {
         span_count.textContent = approved_list[i][2];
 
         col_div.append(span_etiquette, icon, span_count);
-        approvedEtiquetteRow.appendChild(col_div);
+        approvedEtiquetteRow.insertBefore(col_div, approvedEtiquetteRow.firstChild);
         icon.addEventListener('click', function (){
             clickTickXUpvoteHandler(icon, 'vote');
         });
