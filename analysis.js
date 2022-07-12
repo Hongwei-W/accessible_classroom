@@ -1,17 +1,22 @@
-import { postHandler, getHandler, formEncoding, accessible_classroom_system_status, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
+import { postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
 import { removeAllChildNodes } from "./features/utilitiesDOM.js";
-import {findGetParameter, redColors, removeElements} from "./features/utilities.js";
+import {findGetParameter, redColors, removeElements, WPM} from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
 import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
-import { Stopwatch } from "./features/stopwatch.js";
-import {speakingDurationRetrieveHandler, startStopwatch, stopStopwatch} from "./features/speakDuration.js";
+import {arrangeSpeakingDuration, totalDuration} from "./features/speakDuration.js";
+import {
+    durationRetrieveHandler,
+    durationSubmissionHandler,
+    startStopwatch,
+    stopStopwatch, sumDuration
+} from "./features/speakDuration.js";
 /* retrieve parameter */
 
 const isAdmin = (findGetParameter("admin") === 'true');
 const name = findGetParameter("name");
 const tabId = parseInt(findGetParameter('tabId'));
 
-export {name};
+export {name, tabId};
 
 if (!isAdmin) {removeElements(document.getElementsByClassName("admin"));}
 
@@ -104,24 +109,17 @@ if (isAdmin) {
     })
 
     chatSpeakoutNotifySubmissionHandler(false);
-
-    /* retrieve speaking duration */
-
-    // TODO write a setInterval()
-    document.getElementById('speakingDuration').addEventListener('click', function () {
-        speakingDurationRetrieveHandler();
-    })
 }
 
-// no matter if is admin or not TODO de-comment
-// let retrieve_chatSpeakoutNotify = setInterval(function () {
-//     chatSpeakoutNotifyRetrieveHandler();
-// }, 1000)
+// no matter if is admin or not
+let retrieve_chatSpeakoutNotify = setInterval(function () {
+    chatSpeakoutNotifyRetrieveHandler();
+}, 1000)
 
 //use in developing
-document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
-    chatSpeakoutNotifyRetrieveHandler();
-})
+// document.getElementById('chatSpeakoutNotify').addEventListener('click', function () {
+//     chatSpeakoutNotifyRetrieveHandler();
+// })
 
 
 /* sound loop back */
@@ -216,24 +214,13 @@ function submitStatusIndicator(node, successMsg) {
             node.textContent = original_content;
         },
         2000)
-
 }
 
 
 /* retrieve etiquette from gsheet */
 
-// let retrieve_etiquette_from_gsheet = setInterval(function () {
-//     console.log('get etiquette start');
-//     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
-//         .then(function(data){
-//         arrangeEtiquette(data);
-//         })
-//         .catch(function(error) {
-//             console.log(error);
-//         })
-// }, 2000)
-
-document.getElementById('test').addEventListener('click', function () {
+let retrieve_etiquette_from_gsheet = setInterval(function () {
+    console.log('get etiquette start');
     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
         .then(function(data){
         arrangeEtiquette(data);
@@ -241,7 +228,18 @@ document.getElementById('test').addEventListener('click', function () {
         .catch(function(error) {
             console.log(error);
         })
-})
+}, 2000)
+
+// used for developing
+// document.getElementById('test').addEventListener('click', function () {
+//     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
+//         .then(function(data){
+//         arrangeEtiquette(data);
+//         })
+//         .catch(function(error) {
+//             console.log(error);
+//         })
+// })
 
 function arrangeEtiquette(data) {
     let pending_list = new Array();
@@ -292,10 +290,12 @@ function arrangeEtiquette(data) {
         let col_div = document.createElement("div");
         col_div.className= "col-auto etiquette-each";
         if (i != approved_list.length-1 && approved_list[i][2] == approved_list[i+1][2]) {
-            col_div.style.color = approvedEtiquetteRow.firstChild.style.color;
+            col_div.style.backgroundColor = approvedEtiquetteRow.firstChild.style.backgroundColor;
+            col_div.style.borderColor = approvedEtiquetteRow.firstChild.style.borderColor;
             // colorCoefficient = Math.ceil(i / redColors.length);
         } else {
-            col_div.style.color = redColors[Math.floor((reverseCounter/colorCoefficient))];
+            col_div.style.backgroundColor = redColors[Math.floor((reverseCounter/colorCoefficient))];
+            col_div.style.borderColor = redColors[Math.floor((reverseCounter/colorCoefficient))];
             // reverseCounter += 1;
         }
         reverseCounter += 1;
@@ -303,11 +303,14 @@ function arrangeEtiquette(data) {
         let span_etiquette = document.createElement("span");
         span_etiquette.className = "etiquette-sentence";
         span_etiquette.textContent = approved_list[i][3];
+        span_etiquette.style.color = "white";
         let icon = document.createElement("i");
         icon.className = "fa-regular fa-bell";
+        icon.style.color = "white";
         let span_count = document.createElement("span");
         span_count.className = "etiquette-count";
         span_count.textContent = approved_list[i][2];
+        span_count.style.color = "white";
 
         col_div.append(span_etiquette, icon, span_count);
         approvedEtiquetteRow.insertBefore(col_div, approvedEtiquetteRow.firstChild);
@@ -405,15 +408,14 @@ function msgSubmissionHandler(msg) {
         })
 }
 
-// TODO comment back
-// let retrieve_msg_from_gsheet = setInterval(function () {
-//     msgRetrieveHandler();
-// }, 1000)
+let retrieve_msg_from_gsheet = setInterval(function () {
+    msgRetrieveHandler();
+}, 1000)
 
 //use in developing
-document.getElementById('msg').addEventListener('click', function () {
-    msgRetrieveHandler();
-})
+// document.getElementById('msg').addEventListener('click', function () {
+//     msgRetrieveHandler();
+// })
 
 function msgRetrieveHandler() {
     console.log('start retrieve msg');
@@ -441,11 +443,71 @@ function arrange_msg(data) {
     }
     console.log(notifications);
 
-    if (notifications.length != 0) {
+    if (notifications.length !== 0) {
         let notificationsJson = JSON.stringify(notifications);
         chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
             console.log('msg retrieve ');
             console.log(response.success);
         })
     }
+}
+
+/* listeners -- from contentScript or background script */
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        /* receive what typed into chat from content script */
+        if (request.type === "chatText") {
+            try {
+                console.log('receive chatText from contentScript')
+                let chat = request.num_words;
+                console.log(chat);
+                let speechTime = (chat) / WPM["slow"] * 3600;
+
+                durationSubmissionHandler(speechTime, 'text_duration')
+                sendResponse({success: true});
+            }
+            catch (e) {
+                console.log(e);
+                sendResponse({success: false});
+            }
+        }
+    }
+);
+
+
+if (isAdmin) {
+    /* retrieve speaking duration */
+
+    //
+    // document.getElementById('speakingDuration').addEventListener('click', function () {
+    //     durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration)
+    //         .then(() => {
+    //     })
+    // })
+
+    // document.getElementById('chatDuration').addEventListener('click', function () {
+    //
+    // })
+
+    let updateUsageBar = window.setInterval(function () {
+        durationRetrieveHandler("text_duration", sumDuration)
+            .then(() => {
+                let speakingPercentage = ((totalDuration.speaking / (totalDuration.speaking + totalDuration.text)) * 100).toFixed(2);
+                let textPercentage = ((totalDuration.text / (totalDuration.speaking + totalDuration.text)) * 100).toFixed(2);
+                let usageScale = (totalDuration.speaking / (totalDuration.speaking + totalDuration.text)).toFixed(2);
+                console.log("two percentage " +  speakingPercentage + " and "+ textPercentage);
+                if (totalDuration.text !== 0 || totalDuration.speaking !== 0) {
+                    document.getElementById("voice").innerText = "Voice " + speakingPercentage + "%";
+                    document.getElementById("text").innerText = "Text " + textPercentage + "%";
+                    document.getElementById("usage").value = usageScale;
+                }
+            })
+    }, 5000);
+
+    let speakingFrequency = window.setInterval(function() {
+        durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration)
+            .then(() => {
+
+            })
+    }, 5000)
 }

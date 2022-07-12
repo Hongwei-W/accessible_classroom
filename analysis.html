@@ -80,15 +80,15 @@
 
     <div class="row section admin">
         <div class="row">
-            <div class="col">Usage of Voice V.S. Keyboard</div>
+            <div class="col">Usage of Voice V.S. Text Chat</div>
         </div>
         <div class="row">
-            <div class="col-4 text-end">Voice</div>
+            <div class="col-4 text-end" id="voice">Voice</div>
             <div class="col-6">
                 <meter id="usage" high="0.25" max="1" value="0"></meter>
             </div>
-            <div class="col-2">
-                Keyboard
+            <div class="col-2" id="text">
+                Text
             </div>
         </div>
     </div>
@@ -97,8 +97,8 @@
         <div class="row">
             <div class="col">Speaking Frequency (refresh every 20 seconds)</div>
         </div>
-        <div class="row">
-            <div class="col-8 offset-4">
+        <div class="row" id="speaking_frequency">
+<!--            <div class="col-8 offset-4">-->
 <!--                <div id="app">-->
 <!--                    <graph-bubblecloud-->
 <!--                            :width="500"-->
@@ -115,8 +115,8 @@
 <!--                        <note :text="'Bubble Cloud (Created by luavis)'" :align="'left'"></note>-->
 <!--                    </graph-bubblecloud>-->
 <!--                </div>-->
-                <img src="bubble.png" class="img-fluid">
-            </div>
+<!--                <img src="bubble.png" class="img-fluid">-->
+<!--            </div>-->
         </div>
         <div class="row">
             <div class="col-8 text-end offset-4">
@@ -170,25 +170,30 @@
     </div>
 
 
-    <div>
-        msg
-        <i class="fa fa-paper-plane" id="msg" aria-hidden="true"></i>
-    </div>
+<!--    <div>-->
+<!--        msg-->
+<!--        <i class="fa fa-paper-plane" id="msg" aria-hidden="true"></i>-->
+<!--    </div>-->
 
-    <div>
-        etiquette
-        <i class="fa fa-paper-plane" id="test" aria-hidden="true"></i>
-    </div>
+<!--    <div>-->
+<!--        etiquette-->
+<!--        <i class="fa fa-paper-plane" id="test" aria-hidden="true"></i>-->
+<!--    </div>-->
 
-    <div>
-        chatSpeakoutNotify
-        <i class="fa fa-paper-plane" id="chatSpeakoutNotify" aria-hidden="true"></i>
-    </div>
+<!--    <div>-->
+<!--        chatSpeakoutNotify-->
+<!--        <i class="fa fa-paper-plane" id="chatSpeakoutNotify" aria-hidden="true"></i>-->
+<!--    </div>-->
 
-    <div class="admin">
-        speak duration
-        <i class="fa fa-paper-plane" id="speakingDuration" aria-hidden="true"></i>
-    </div>
+<!--    <div class="admin">-->
+<!--        speak duration-->
+<!--        <i class="fa fa-paper-plane" id="speakingDuration" aria-hidden="true"></i>-->
+<!--    </div>-->
+
+<!--    <div class="admin">-->
+<!--        chat duration-->
+<!--        <i class="fa fa-paper-plane" id="chatDuration" aria-hidden="true"></i>-->
+<!--    </div>-->
 
 </div>
 </body>

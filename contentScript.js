@@ -1,28 +1,22 @@
-var chatTextarea = null;
+let chatTextarea = null;
+let chatTextareaSubmitBtn = null;
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
         if (request.type == 'listener') {
             try {
-                if (chatTextarea == null) {
-                    let TextareaCollection = document.getElementsByTagName('textarea');
-                    if (TextareaCollection.length == 0) {
-                        throw 'cannot find textarea element error';
-                    }
-                    console.log('find node -- textarea' + TextareaCollection[0]);
-                    chatTextarea = TextareaCollection[0];
-                }
+                if (chatTextarea == null) {findChatTextArea();}
 
                 if (request.expectingStatus == 'on') {
                     chatTextarea.addEventListener('keypress', chatSpeakNotifyListenerHandler)
-                    sendResponse({success: true});
                     console.log('chat speak out notification turned on');
                 }
                 else {
                     chatTextarea.removeEventListener('keypress', chatSpeakNotifyListenerHandler)
                     console.log('chat speak out notification turned off');
-                    sendResponse({success: true});
                 }
+
+                sendResponse({success: true});
             }
             catch (e){
                 console.log(e);
@@ -35,8 +29,31 @@ chrome.runtime.onMessage.addListener(
                 if (document.getElementsByTagName('textarea').length == 0) {
                     chatBtn.click();
                 }
-                // const newChatBtn = chatBtn.cloneNode(true);
                 chatBtn.parentNode.removeChild(chatBtn);
+                window.setTimeout(function () {
+                    /* bind a listener to "send" button, wait for page to load*/
+                    findChatTextArea();
+                    chatTextareaSubmitBtn = chatTextarea.parentNode.parentNode.parentNode.querySelector("button");
+                    chatTextareaSubmitBtn.addEventListener('click', ()=> {
+                        console.log("retrieve chat text: " + chatTextarea.value);
+                        chrome.runtime.sendMessage({type: 'chatText', num_words: chatTextarea.value.split(' ').length}, function (response) {
+                            console.log(response.success);
+                        })
+                    });
+                    let text = null;
+                    chatTextarea.addEventListener('keyup', (e) => {
+                        if (e.key !== 'Enter' || e.keyCode !== 13) {
+                            text = chatTextarea.value;
+                        }
+                        if (e.key === 'Enter' || e.keyCode === 13) {
+                            console.log("after enter: retrieve chat text: " + text);
+                            chrome.runtime.sendMessage({type: 'chatText', num_words: text.split(' ').length}, function (response) {
+                                console.log(response.success);
+                            })
+                        }
+                    })
+                }, 1000);
+
                 sendResponse({success: true});
             }
             catch (e){
@@ -55,6 +72,15 @@ function chatSpeakNotifyListenerHandler() {
         console.log('msg retrieve ');
         console.log(response.success);
     })
+}
+
+function findChatTextArea() {
+    let TextareaCollection = document.getElementsByTagName('textarea');
+    if (TextareaCollection.length == 0) {
+        throw 'cannot find textarea element error';
+    }
+    console.log('find node -- textarea' + TextareaCollection[0]);
+    chatTextarea = TextareaCollection[0];
 }
 
 

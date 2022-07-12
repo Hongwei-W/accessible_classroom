@@ -29,13 +29,10 @@ function formEncoding(details) {
     return formBody;
 }
 
-const accessible_classroom_system_status =
-    'https://script.google.com/macros/s/AKfycbwIp83wddV0IFmjMS-PznvZQziwWKcGFqTPJKUBrTtlLlC8qcqgbFGuwZfvBbxssGFW/exec';
-
 const accessible_classroom_general_gsheet =
-    'https://script.google.com/macros/s/AKfycbz-mpOR2rNo8ttCGOxL_vv_kuSSOfL3dSOiFaXIP9aWHS3Vy4arYd8GfQGtpMD3bQLT/exec';
+    'https://script.google.com/macros/s/AKfycbzL38uXB09hMwR0FKL9PzN7al_NmnHu3CcJeClRy7_9V5YDRyaQ9XcXGSfMWfQfuSb0/exec';
 
 const accessible_classroom_message_gsheet =
     'https://script.google.com/macros/s/AKfycbwoCR3wKZlhQbNN24unWFyAxcOSW_zDXkA4AEVzcccJLDIXFO9KhsjY_p5Xyr7WU2s/exec';
 
-export {postHandler, getHandler, formEncoding, accessible_classroom_system_status, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet};
+export {postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet};

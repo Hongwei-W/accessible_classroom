@@ -1,10 +1,16 @@
-import {accessible_classroom_system_status, formEncoding, getHandler, postHandler} from "./utilitiesREST.js";
+import {
+    accessible_classroom_general_gsheet,
+    formEncoding,
+    getHandler,
+    postHandler
+} from "./utilitiesREST.js";
+import { tabId } from "../analysis.js";
 
 let notifySpeakout = false;
 
 function chatSpeakoutNotifyRetrieveHandler() {
     console.log('start retrieve chatSpeakoutNotify setting');
-    let url = accessible_classroom_system_status + '?sheet=Chat-Speakout-Notify';
+    let url = accessible_classroom_general_gsheet + '?sheet=chat_speakout_notify';
     getHandler(url)
         .then(function(data){
             if (data.status == 'success') {
@@ -36,12 +42,13 @@ function chatSpeakoutNotifySubmissionHandler(val) {
     console.log("submit chat needed to speak out request ");
 
     var details = {
-        'sheet': "Chat-Speakout-Notify",
+        'sheet': "chat_speakout_notify",
+        'operation': 'update',
         'setting': val,
     }
     let formBody = formEncoding(details);
 
-    postHandler(accessible_classroom_system_status, formBody)
+    postHandler(accessible_classroom_general_gsheet, formBody)
         .then(function(data){
             console.log(data);
         })
