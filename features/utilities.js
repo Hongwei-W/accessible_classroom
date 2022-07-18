@@ -19,6 +19,7 @@ function removeElements(admin_elements) {
 }
 
 let redColors = ["#FFA07A", "#F08080","#FA8072", "#CD5C5C","#B22222", "#8B0000"];
+let greenColors = ['#4F7942', '#008000', '#228B22'];
 let WPM = {'slow': 100, 'average': 130, 'fast': 160};
 
-export {findGetParameter, removeElements, redColors, WPM};
+export {findGetParameter, removeElements, redColors, greenColors, WPM};

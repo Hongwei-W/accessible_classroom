@@ -33,25 +33,10 @@ chrome.runtime.onMessage.addListener(
                 window.setTimeout(function () {
                     /* bind a listener to "send" button, wait for page to load*/
                     findChatTextArea();
-                    chatTextareaSubmitBtn = chatTextarea.parentNode.parentNode.parentNode.querySelector("button");
-                    chatTextareaSubmitBtn.addEventListener('click', ()=> {
-                        console.log("retrieve chat text: " + chatTextarea.value);
-                        chrome.runtime.sendMessage({type: 'chatText', num_words: chatTextarea.value.split(' ').length}, function (response) {
-                            console.log(response.success);
-                        })
-                    });
-                    let text = null;
-                    chatTextarea.addEventListener('keyup', (e) => {
-                        if (e.key !== 'Enter' || e.keyCode !== 13) {
-                            text = chatTextarea.value;
-                        }
-                        if (e.key === 'Enter' || e.keyCode === 13) {
-                            console.log("after enter: retrieve chat text: " + text);
-                            chrome.runtime.sendMessage({type: 'chatText', num_words: text.split(' ').length}, function (response) {
-                                console.log(response.success);
-                            })
-                        }
-                    })
+                    enableChatTextCollecting();
+
+                    const chatCloseBtn = document.querySelector('[aria-label="Close"]');
+                    chatCloseBtn.parentNode.removeChild(chatCloseBtn);
                 }, 1000);
 
                 sendResponse({success: true});
@@ -59,6 +44,22 @@ chrome.runtime.onMessage.addListener(
             catch (e){
                 console.log(e);
                 sendResponse({success: false, error: e});
+            }
+        }
+        else if (request.type == 'alert') {
+            try {
+                console.log("try alert msgs");
+                let msgs = JSON.parse(request.content);
+                let len = msgs.length;
+
+                for (let i = 0; i < len; i++) {
+                    alert(msgs[i]);
+                }
+                sendResponse({success: true});
+            }
+            catch (e) {
+                console.log(e);
+                sendResponse({success: false});
             }
         }
     }
@@ -81,6 +82,27 @@ function findChatTextArea() {
     }
     console.log('find node -- textarea' + TextareaCollection[0]);
     chatTextarea = TextareaCollection[0];
+}
+
+function enableChatTextCollecting() {
+    chatTextareaSubmitBtn = chatTextarea.parentNode.parentNode.parentNode.querySelector("button");
+    chatTextareaSubmitBtn.addEventListener('click', ()=> {
+        console.log("retrieve chat text: " + chatTextarea.value);
+        chrome.runtime.sendMessage({type: 'chatText', num_words: chatTextarea.value.split(' ').length}, function (response) {
+            console.log(response.success);
+        })
+    });
+    let text = null;
+    chatTextarea.addEventListener('keyup', (e) => {
+        if (e.key !== 'Enter' || e.keyCode !== 13) {
+            text = chatTextarea.value;
+        }
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            chrome.runtime.sendMessage({type: 'chatText', num_words: text.split(' ').length}, function (response) {
+                console.log(response.success);
+            })
+        }
+    })
 }
 
 

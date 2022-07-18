@@ -1,5 +1,6 @@
 meter {
     width: 100%;
+    position: relative;
 }
 
 body {
@@ -30,12 +31,56 @@ i {
 }
 
 .link-like-text {
-    color: blue;
-    text-decoration: underline;
+    background-color: crimson;
+    color: white;
+    cursor: pointer;
+    padding: 2px 5px;
+    border-radius: 10px;
+}
+
+.link-like-text#customise-msg {
+    background-color: forestgreen !important;
+}
+
+.link-like-text:hover {
+    background-color: darkred;
+}
+
+.link-like-text#customise-msg:hover {
+    background-color: darkgreen !important;
 }
 
 .text-input {
     background:transparent;
     border:none;
     border-bottom:1px solid #000000;
+}
+
+.vertical{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.vertical .line{
+    width: 2px;
+    height: 100%;
+    background: blue;
+    display: block;
+    border: none;
+}
+
+.coloverlay{
+    position: absolute;
+    top: 33px;
+    left:10%;
+    z-index:1;
+    bottom:0;
+    right:0;
+    height:100%;
+    pointer-events: none;
+}
+
+.space{
+    height: 2px;
 }

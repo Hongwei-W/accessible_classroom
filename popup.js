@@ -37,7 +37,7 @@ function notGoogleMeet() {
 join_btn.addEventListener('click', function (){
     if (validateWelcomeForm()) {
         let name = document.forms['welcomeForm']['name'].value;
-        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabInfo['tabId'],'result','width=620px, height=700px');
+        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabInfo['tabId'],'result','width=670px, height=700px');
         window.close();
         // document.getElementById('welcomeForm').submit();
     }
@@ -79,7 +79,7 @@ admin_btn.addEventListener('click', function() {
     login_btn.addEventListener('click', function (){
         if (validateJoinForm()) {
             window.close();
-            window.open('./analysis.html?name='+name+'&admin=true&tabId=' + tabInfo['tabId'],'result','width=620px, height=700px');
+            window.open('./analysis.html?name='+name+'&admin=true&tabId=' + tabInfo['tabId'],'result','width=670px, height=700px');
             document.getElementById('welcomeForm').submit();
         }
     })

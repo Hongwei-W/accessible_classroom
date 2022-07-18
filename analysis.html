@@ -8,6 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <!-- font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script type="module" src="features/less.js"></script>
+    <link rel="stylesheet" href="features/barChart.css">
 </head>
 
 <body>
@@ -20,7 +22,10 @@
         <div class="row" id="instant">
             <div class="col-4">Volume</div>
             <div class="col-6">
-                <meter high="0.25" max="1" value="0"></meter>
+                <meter low="1.5" high="8" max="10" value="0" ></meter>
+                <div class="offset-4 col-6 coloverlay">
+                    <span>|</span>
+                </div>
             </div>
             <div class="value col text-end"></div>
         </div>
@@ -54,11 +59,11 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-4" id="msg-submit-status-indication">
-
+            <div class="col-4 text-end" id="msg-submit-status-indication">
+                Please
             </div>
             <div class="col-8">
-                Please <span class="link-like-text" id="speak-louder">speak louder</span> <span class="link-like-text" id="speak-slower">speak slower</span> <span class="link-like-text" id="customise-msg">customise msg</span>
+                <span class="link-like-text" id="speak-louder">speak louder</span> <span class="link-like-text" id="speak-slower">speak slower</span> <span class="link-like-text" id="customise-msg">customise msg</span>
             </div>
         </div>
 
@@ -95,35 +100,14 @@
 
     <div class="row section admin">
         <div class="row">
-            <div class="col">Speaking Frequency (refresh every 20 seconds)</div>
+            <div class="col">Speaking Durations & Last Speakers (minutes)</div>
         </div>
-        <div class="row" id="speaking_frequency">
-<!--            <div class="col-8 offset-4">-->
-<!--                <div id="app">-->
-<!--                    <graph-bubblecloud-->
-<!--                            :width="500"-->
-<!--                            :height="500"-->
-<!--                            :padding-top="5"-->
-<!--                            :padding-bottom="0"-->
-<!--                            :padding-left="0"-->
-<!--                            :padding-right="0"-->
-<!--                            :values="values"-->
-<!--                            :colors="colors"-->
-<!--                            :styles="styles"-->
-<!--                            :render-interval="0"-->
-<!--                            @click="onClickEvent">-->
-<!--                        <note :text="'Bubble Cloud (Created by luavis)'" :align="'left'"></note>-->
-<!--                    </graph-bubblecloud>-->
-<!--                </div>-->
-<!--                <img src="bubble.png" class="img-fluid">-->
-<!--            </div>-->
-        </div>
+        <div class="row" id="speaking_frequency"></div>
         <div class="row">
             <div class="col-8 text-end offset-4">
-                Big bubble for person speaks
-                <span style="color:grey">most</span>
-                <i class="fa-solid fa-toggle-on"></i>
-                <span style="color:black">least</span>
+                <span style="color:grey">Descend</span>
+                <i class="fa-solid fa-toggle-off" id="durationToggle"></i>
+                <span style="color:black">Ascend</span>
             </div>
         </div>
     </div>

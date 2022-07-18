@@ -3,7 +3,7 @@ import { removeAllChildNodes } from "./features/utilitiesDOM.js";
 import {findGetParameter, redColors, removeElements, WPM} from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
 import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
-import {arrangeSpeakingDuration, totalDuration} from "./features/speakDuration.js";
+import {arrangeSpeakingDuration, recentSpokenRetrieveHandler, totalDuration} from "./features/speakDuration.js";
 import {
     durationRetrieveHandler,
     durationSubmissionHandler,
@@ -50,18 +50,15 @@ function handleSoundMeterSuccess(stream) {
         }
         meterRefresh = setInterval(() => {
             instantMeter.value = instantValueDisplay.innerText =
-                soundMeter.instant.toFixed(2);
+                (soundMeter.instant * 20).toFixed(2);
         }, 200);
         meterStopWatch = setInterval(() => {
             let instantVolume = soundMeter.instant.toFixed(2);
-            console.log('instantVolume ' + instantVolume);
             if (instantVolume > 0.01 && !speaking) {
-                console.log('start stopwatch');
                 speaking = true;
                 startStopwatch();
             }
             else if (instantVolume < 0.01 && speaking) {
-                console.log('stop stopwatch');
                 speaking = false;
                 stopStopwatch();
             }
@@ -171,7 +168,6 @@ const pendingEtiquetteRow = document.getElementById("pending-etiquette-row");
 const approvedEtiquetteRow = document.getElementById("approved-etiquette-row");
 
 function etiquetteSubmissionHandler() {
-    console.log("submit etiquette by etiquetteSubmissionHandler");
 
     let details = {
         'sheet': 'etiquette',
@@ -200,7 +196,6 @@ function etiquetteSubmissionHandler() {
 }
 
 submitEtiquette.addEventListener("click", function() {
-    console.log(inputEtiquette.value);
     if (inputEtiquette.value != '') {
         etiquetteSubmissionHandler();
     }
@@ -220,7 +215,6 @@ function submitStatusIndicator(node, successMsg) {
 /* retrieve etiquette from gsheet */
 
 let retrieve_etiquette_from_gsheet = setInterval(function () {
-    console.log('get etiquette start');
     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
         .then(function(data){
         arrangeEtiquette(data);
@@ -325,7 +319,6 @@ function arrangeEtiquette(data) {
 function clickTickXUpvoteHandler(node, operation) {
     const div = node.parentNode;
     const inputEtiquette = div.querySelector(".etiquette-sentence");
-    console.log("submit " + operation);
 
     let details = {
         'sheet': 'etiquette',
@@ -412,13 +405,12 @@ let retrieve_msg_from_gsheet = setInterval(function () {
     msgRetrieveHandler();
 }, 1000)
 
-//use in developing
+// use in developing
 // document.getElementById('msg').addEventListener('click', function () {
 //     msgRetrieveHandler();
 // })
 
 function msgRetrieveHandler() {
-    console.log('start retrieve msg');
     getHandler(accessible_classroom_message_gsheet)
         .then(function(data){
             arrange_msg(data);
@@ -441,12 +433,13 @@ function arrange_msg(data) {
         timestemps.push(data[i][0]);
         notifications.push(data[i][1]);
     }
-    console.log(notifications);
 
     if (notifications.length !== 0) {
         let notificationsJson = JSON.stringify(notifications);
-        chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
-            console.log('msg retrieve ');
+        // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
+        //     console.log(response.success);
+        // })
+        chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
             console.log(response.success);
         })
     }
@@ -458,9 +451,7 @@ chrome.runtime.onMessage.addListener(
         /* receive what typed into chat from content script */
         if (request.type === "chatText") {
             try {
-                console.log('receive chatText from contentScript')
                 let chat = request.num_words;
-                console.log(chat);
                 let speechTime = (chat) / WPM["slow"] * 3600;
 
                 durationSubmissionHandler(speechTime, 'text_duration')
@@ -474,28 +465,28 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
+let durationAscend = false;
 
 if (isAdmin) {
     /* retrieve speaking duration */
-
-    //
-    // document.getElementById('speakingDuration').addEventListener('click', function () {
-    //     durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration)
-    //         .then(() => {
-    //     })
-    // })
-
-    // document.getElementById('chatDuration').addEventListener('click', function () {
-    //
-    // })
-
+    const durationSwitch = document.getElementById("durationToggle");
+    durationSwitch.addEventListener("click", function() {
+        if (durationAscend) {
+            durationAscend = false;
+            durationSwitch.className = "fa-solid fa-toggle-off";
+        } else {
+            durationAscend = true;
+            durationSwitch.className = "fa-solid fa-toggle-on";
+        }
+        durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration, durationAscend)
+            .then(() => {})
+    })
     let updateUsageBar = window.setInterval(function () {
         durationRetrieveHandler("text_duration", sumDuration)
             .then(() => {
                 let speakingPercentage = ((totalDuration.speaking / (totalDuration.speaking + totalDuration.text)) * 100).toFixed(2);
                 let textPercentage = ((totalDuration.text / (totalDuration.speaking + totalDuration.text)) * 100).toFixed(2);
                 let usageScale = (totalDuration.speaking / (totalDuration.speaking + totalDuration.text)).toFixed(2);
-                console.log("two percentage " +  speakingPercentage + " and "+ textPercentage);
                 if (totalDuration.text !== 0 || totalDuration.speaking !== 0) {
                     document.getElementById("voice").innerText = "Voice " + speakingPercentage + "%";
                     document.getElementById("text").innerText = "Text " + textPercentage + "%";
@@ -505,9 +496,7 @@ if (isAdmin) {
     }, 5000);
 
     let speakingFrequency = window.setInterval(function() {
-        durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration)
-            .then(() => {
-
-            })
+        durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration, durationAscend)
+            .then(() => {})
     }, 5000)
 }
