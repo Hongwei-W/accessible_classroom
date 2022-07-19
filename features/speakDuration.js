@@ -5,8 +5,7 @@ import {greenColors} from "./utilities.js";
 import {removeAllChildNodes} from "./utilitiesDOM.js";
 
 let stopwatch = new Stopwatch();
-let currentTotalDuration = 0;
-let durationPostThreshold = 2000;
+let durationPostThreshold = 1000;
 let firstSpeakingPost = true;
 let firstTextPost = true;
 /* a total duration measurement, used to compare with text usage */
@@ -16,12 +15,17 @@ function startStopwatch() {
     stopwatch.start();
 }
 
-function stopStopwatch() {
+function stopStopwatch(length) {
     let duration = stopwatch.update();
-    currentTotalDuration += duration;
-    if (currentTotalDuration >= durationPostThreshold) {
-        durationSubmissionHandler(currentTotalDuration, 'speaking_duration');
-        currentTotalDuration = 0;
+    if (duration >= durationPostThreshold && length >= 0) {
+        // submit duration
+        durationSubmissionHandler(duration, 'speaking_duration');
+
+        // display speech speed
+        const speechSpeedMeter = document.querySelector('#speechSpeed meter');
+        speechSpeedMeter.value = Math.round(length/(duration/60000));
+        const speechSpeedValueDisplay = document.querySelector('#speechSpeed .value');
+        speechSpeedValueDisplay.textContent = (length/(duration/60000)).toFixed(2);
     }
     stopwatch.reset();
 }
@@ -120,9 +124,9 @@ function arrangeSpeakingDuration(data, flip) {
         grid_div.className = "col-8 grid horizontal"
         let bar_div = document.createElement("div");
         bar_div.className = "bar";
-        bar_div.textContent = (durations[i][2] / 3600).toFixed(2);
+        bar_div.textContent = (durations[i][2] / 60000).toFixed(2);
         bar_div.style.setProperty( "--bar-value", ((durations[i][2]/divider) * 100).toFixed(2) + "%" );
-        bar_div.setAttribute("title", durations[i][1] + " " + (durations[i][2] / 3600).toFixed(2) + "minutes");
+        bar_div.setAttribute("title", durations[i][1] + " " + (durations[i][2] / 60000).toFixed(2) + "minutes");
         title_div.appendChild(title_span);
         grid_div.appendChild(bar_div);
         speakingFrequencyRow.append(title_div, grid_div);

@@ -8,7 +8,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <!-- font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <script type="module" src="features/less.js"></script>
     <link rel="stylesheet" href="features/barChart.css">
 </head>
 
@@ -29,10 +28,10 @@
             </div>
             <div class="value col text-end"></div>
         </div>
-        <div class="row">
-            <div class="col-4">Speech Speed</div>
+        <div class="row" id="speechSpeed">
+            <div class="col-4">Speech Speed (WPM)</div>
             <div class="col-6">
-                <meter high="0.25" max="1" value="0"></meter>
+                <meter min="60" low="80" high="140" max="160" value="0"></meter>
             </div>
             <div class="value col text-end"></div>
         </div>
@@ -156,7 +155,9 @@
 
 <!--    <div>-->
 <!--        msg-->
+<!--        <span id="instruction"></span>-->
 <!--        <i class="fa fa-paper-plane" id="msg" aria-hidden="true"></i>-->
+<!--        <span id="noteContent"></span>-->
 <!--    </div>-->
 
 <!--    <div>-->

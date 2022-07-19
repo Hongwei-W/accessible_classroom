@@ -3,13 +3,18 @@ import { removeAllChildNodes } from "./features/utilitiesDOM.js";
 import {findGetParameter, redColors, removeElements, WPM} from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
 import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
-import {arrangeSpeakingDuration, recentSpokenRetrieveHandler, totalDuration} from "./features/speakDuration.js";
+import {
+    arrangeSpeakingDuration,
+    recentSpokenRetrieveHandler,
+    totalDuration
+} from "./features/speakDuration.js";
 import {
     durationRetrieveHandler,
     durationSubmissionHandler,
     startStopwatch,
     stopStopwatch, sumDuration
 } from "./features/speakDuration.js";
+import {Stopwatch} from "./features/stopwatch.js";
 /* retrieve parameter */
 
 const isAdmin = (findGetParameter("admin") === 'true');
@@ -23,6 +28,42 @@ if (!isAdmin) {removeElements(document.getElementsByClassName("admin"));}
 chrome.tabs.sendMessage(tabId, {type: "initialize", expectingStatus: 'on'}, function (response) {
     console.log(response.success);
 });
+
+
+/* speech recognition */
+
+let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = new SpeechRecognition();
+recognition.lang = 'en-US';
+
+let recognitionOn = false;
+
+recognition.onstart = function() {
+    console.log('Voice recognition activated. Try speaking into the microphone.');
+    recognitionOn = true;
+    startStopwatch();
+}
+
+recognition.onspeechend = function() {
+    console.log('You were quiet for a while so voice recognition turned itself off.');
+    recognitionOn = false;
+}
+
+recognition.onerror = function(event) {
+    if(event.error == 'no-speech') {
+        console.log('No speech was detected. Try again.');
+        recognitionOn = false;
+    };
+}
+
+recognition.onresult = function(event) {
+
+    let current = event.resultIndex;
+    let transcript = event.results[current][0].transcript;
+    console.log(transcript);
+    stopStopwatch(transcript.split(' ').length);
+}
+
 
 /* sound meter */
 
@@ -55,14 +96,9 @@ function handleSoundMeterSuccess(stream) {
         meterStopWatch = setInterval(() => {
             let instantVolume = soundMeter.instant.toFixed(2);
             if (instantVolume > 0.01 && !speaking) {
-                speaking = true;
-                startStopwatch();
+                if (!recognitionOn) {recognition.start();}
             }
-            else if (instantVolume < 0.01 && speaking) {
-                speaking = false;
-                stopStopwatch();
-            }
-        }, 1000);
+        }, 100);
     });
 }
 
