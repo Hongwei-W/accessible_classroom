@@ -90,8 +90,8 @@ function handleSoundMeterSuccess(stream) {
             return;
         }
         meterRefresh = setInterval(() => {
-            instantMeter.value = instantValueDisplay.innerText =
-                (soundMeter.instant * 20).toFixed(2);
+            instantMeter.value = (soundMeter.slow).toFixed(2);
+            instantMeter.value = (soundMeter.slow * 20).toFixed(2);
         }, 200);
         meterStopWatch = setInterval(() => {
             let instantVolume = soundMeter.instant.toFixed(2);

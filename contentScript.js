@@ -39,6 +39,14 @@ chrome.runtime.onMessage.addListener(
                     chatCloseBtn.parentNode.removeChild(chatCloseBtn);
                 }, 1000);
 
+                window.setInterval(function() {
+                    const captionOnBtn = document.querySelector('[aria-label*="on captions"]');
+
+                    if (captionOnBtn) {
+                        alert("For better meeting experience, turn on caption (click CC button) for a live transcription")
+                    }
+                }, 120000);
+
                 sendResponse({success: true});
             }
             catch (e){
@@ -48,7 +56,6 @@ chrome.runtime.onMessage.addListener(
         }
         else if (request.type == 'alert') {
             try {
-                console.log("try alert msgs");
                 let msgs = JSON.parse(request.content);
                 let len = msgs.length;
 

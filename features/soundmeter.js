@@ -1,6 +1,7 @@
 function SoundMeter(context) {
     this.context = context;
     this.instant = 0.0;
+    this.slow = 0.0;
     this.script = context.createScriptProcessor(2048, 1, 1);
     const that = this;
     this.script.onaudioprocess = function(event) {
@@ -15,6 +16,7 @@ function SoundMeter(context) {
             }
         }
         that.instant = Math.sqrt(sum / input.length);
+        that.slow = 0.95 * that.slow + 0.05 * that.instant;
     };
 }
 
