@@ -4,56 +4,97 @@ meter {
 }
 
 body {
-    padding: 10px 5px;
+    padding: 10px 10px;
+    background-color: #F7F8FC !important;
+    font-family: 'Mulish' !important;
 }
 
 .section {
     margin: 15px 0px;
+    padding: 10px 5px!important;
+    background-color: #FFFFFF;
+    border-radius: 5px;
+    border: 0.5px solid rgba(128, 128, 0, 0.2);
+}
+
+.section.left-half {
+    margin-right: 4px !important;
+}
+
+.section.right-half {
+    margin-left: 4px !important;
+}
+
+.meter .button{
+    border-radius: 50%;
+    padding: 5px;
+    margin: 4px;
+    text-align: center;
+    font-size: small;
+    color: white;
+}
+
+.meter#instant .button, .etiquette .button.fa-check, .etiquette .button.fa-bell {
+    background-color: #29CC97;
+}
+
+.meter#instant .button, .etiquette .button.fa-check, .etiquette .button.fa-bell:hover {
+    background-color: #29CC97B3;
+}
+
+
+.meter#speechSpeed .button, .etiquette .button.fa-xmark {
+    background-color: #FEC400;
+}
+
+.meter#speechSpeed .button, .etiquette .button.fa-xmark:hover {
+    background-color: #FEC400B3;
+}
+
+.toggle-sub-title {
+    color: #FEC400 !important;
+    font-weight: bold;
+    margin-right: 2px;
 }
 
 .description {
     margin: 0px 5px;
 }
 
-.etiquette-each {
-    border-style: dotted;
-    margin: 2px 4px;
-    border-radius: 25px;
-    padding: 2px;
-}
-
-i {
-    margin: 0px 3px;
-}
-
-.etiquette-sentence{
-    margin-right:10px;
-}
-
 .link-like-text {
-    background-color: crimson;
+    background-color: #29CC97;
     color: white;
     cursor: pointer;
-    padding: 2px 5px;
+    padding: 3px 7px;
     border-radius: 10px;
-}
-
-.link-like-text#customise-msg {
-    background-color: forestgreen !important;
+    font-size: small;
 }
 
 .link-like-text:hover {
-    background-color: darkred;
+    background-color: #29CC97B3 !important;
 }
 
-.link-like-text#customise-msg:hover {
-    background-color: darkgreen !important;
+.sub-title {
+    font-size: small;
+    color: grey;
+}
+
+.toggle {
+    color: #FEC400;
+    font-size: x-large;
+
 }
 
 .text-input {
     background:transparent;
     border:none;
-    border-bottom:1px solid #000000;
+    border-bottom:1px solid #80808066;
+    width: 100% !important;
+    font-size: small;
+}
+
+input:focus{
+    outline: none;
 }
 
 .vertical{
@@ -72,8 +113,8 @@ i {
 
 .coloverlay{
     position: absolute;
-    top: 33px;
-    left:10%;
+    top: 68px;
+    left: 25%;
     z-index:1;
     bottom:0;
     right:0;
@@ -81,6 +122,36 @@ i {
     pointer-events: none;
 }
 
-.space{
+.chart-space{
     height: 2px;
+}
+
+.space{
+    min-height:10px;
+}
+
+.etiquette .button {
+    border-radius: 50%;
+    padding: 2px;
+    margin: 2px;
+    text-align: center;
+    font-size: small;
+    color: white;
+}
+
+.line-breaker {
+    height: 2px;
+    background:#80808033;
+    margin: 3px 5px !important;
+}
+
+.etiquette-each {
+    width: 75% !important;
+    max-width: 75% !important;
+    font-size: 0.9em !important;
+}
+
+.etiquette-side {
+    width: 25% !important;
+    max-width: 25% !important;
 }

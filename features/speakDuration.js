@@ -1,7 +1,7 @@
 import {Stopwatch} from "./stopwatch.js";
 import {name} from "../analysis.js";
 import {accessible_classroom_general_gsheet, formEncoding, getHandler, postHandler} from "./utilitiesREST.js";
-import {greenColors} from "./utilities.js";
+import {greenColors, opacity, themeGreen} from "./utilities.js";
 import {removeAllChildNodes} from "./utilitiesDOM.js";
 
 let stopwatch = new Stopwatch();
@@ -25,7 +25,7 @@ function stopStopwatch(length) {
         const speechSpeedMeter = document.querySelector('#speechSpeed meter');
         speechSpeedMeter.value = Math.round(length/(duration/60000));
         const speechSpeedValueDisplay = document.querySelector('#speechSpeed .value');
-        speechSpeedValueDisplay.textContent = (length/(duration/60000)).toFixed(2);
+        speechSpeedValueDisplay.textContent = (length/(duration/60000)).toFixed(2) + " WPM";
     }
     stopwatch.reset();
 }
@@ -65,27 +65,27 @@ function durationRetrieveHandler(sheet, callback, flip=false) {
         })
 }
 
-function recentSpokenRetrieveHandler() {
-     getHandler(accessible_classroom_general_gsheet + '?sheet=speaking_duration&operation=last_speakers')
-        .then(function(data){
-
-            let title_spans = document.getElementsByClassName("title");
-            let counter = 0;
-            for (let i = 0; i < title_spans.length && counter < 3; i++) {
-                if (title_spans[i].textContent == data[counter][0] && title_spans[i].style.backgroundColor == '') {
-                    title_spans[i].style.backgroundColor = greenColors[counter];
-                    title_spans[i].style.color = "white";
-                    counter += 1
-                }
-            }
-
-            let row_div = document.getElementById("recently_spoken");
-
-        })
-        .catch(function(error) {
-            console.log(error);
-        })
-}
+// function recentSpokenRetrieveHandler() {
+//      getHandler(accessible_classroom_general_gsheet + '?sheet=speaking_duration&operation=last_speakers')
+//         .then(function(data){
+//
+//             let title_spans = document.getElementsByClassName("title");
+//             let counter = 0;
+//             for (let i = 0; i < title_spans.length && counter < 3; i++) {
+//                 if (title_spans[i].textContent == data[counter][0] && title_spans[i].style.backgroundColor == '') {
+//                     title_spans[i].style.backgroundColor = greenColors[counter];
+//                     title_spans[i].style.color = "white";
+//                     counter += 1
+//                 }
+//             }
+//
+//             let row_div = document.getElementById("recently_spoken");
+//
+//         })
+//         .catch(function(error) {
+//             console.log(error);
+//         })
+// }
 
 function sumDuration(data, flip) {
     let total = 0;
@@ -116,22 +116,25 @@ function arrangeSpeakingDuration(data, flip) {
     let divider = durations[i][2] > durations[boundary-1][2] ? durations[i][2] : durations[boundary-1][2]
     for (; i < boundary; i++) {
         let title_div = document.createElement("div");
-        title_div.className = "col-4 text-end";
+        title_div.className = "col-12";
         let title_span = document.createElement("span");
-        title_span.className = "title";
+        title_span.className = "sub-title title";
         title_span.textContent = durations[i][1];
+        let space = document.createTextNode("\u00A0");
+        let minute_span = document.createElement("span");
+        minute_span.className = "sub-title";
+        minute_span.textContent = (durations[i][2] / 60000).toFixed(2) + " min";
         let grid_div = document.createElement("div");
-        grid_div.className = "col-8 grid horizontal"
+        grid_div.className = "col-12 grid horizontal"
         let bar_div = document.createElement("div");
         bar_div.className = "bar";
-        bar_div.textContent = (durations[i][2] / 60000).toFixed(2);
         bar_div.style.setProperty( "--bar-value", ((durations[i][2]/divider) * 100).toFixed(2) + "%" );
         bar_div.setAttribute("title", durations[i][1] + " " + (durations[i][2] / 60000).toFixed(2) + "minutes");
-        title_div.appendChild(title_span);
+        title_div.append(title_span, space, minute_span);
         grid_div.appendChild(bar_div);
         speakingFrequencyRow.append(title_div, grid_div);
         let space_div = document.createElement("div");
-        space_div.className = "space";
+        space_div.className = "chart-space";
         speakingFrequencyRow.append(space_div);
     }
 
@@ -140,8 +143,7 @@ function arrangeSpeakingDuration(data, flip) {
     let counter = 0;
     for (let j = 0; j < title_spans.length && counter < 3; j++) {
         if (title_spans[j].textContent == lastSpeakers[counter][0] && title_spans[j].style.backgroundColor == '') {
-            title_spans[j].style.backgroundColor = greenColors[counter];
-            title_spans[j].style.color = "white";
+            title_spans[j].style.backgroundColor = themeGreen + opacity[counter];
             counter += 1
         }
     }
@@ -149,4 +151,4 @@ function arrangeSpeakingDuration(data, flip) {
     sumDuration(durations, flip);
 }
 
-export {startStopwatch, stopStopwatch, durationSubmissionHandler, durationRetrieveHandler, recentSpokenRetrieveHandler, sumDuration, arrangeSpeakingDuration, totalDuration};
+export {startStopwatch, stopStopwatch, durationSubmissionHandler, durationRetrieveHandler, sumDuration, arrangeSpeakingDuration, totalDuration};

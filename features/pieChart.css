@@ -1,0 +1,17 @@
+.pie {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #29CC97;
+    background-image: linear-gradient(to right, transparent 50%, #FEC400 0);
+}
+
+.pie::before {
+    content: "";
+    display: block;
+    margin-left: 50%;
+    height: 100%;
+    background-color: inherit;
+    border-radius: 0 100% 100% 0 / 50%;
+    transform-origin: left;
+}

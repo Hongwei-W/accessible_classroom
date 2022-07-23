@@ -1,153 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link href='https://fonts.googleapis.com/css?family=Mulish' rel='stylesheet'>
     <meta charset="UTF-8">
     <title>Analysis</title>
     <link rel="stylesheet" href="analysis.css">
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
     <!-- font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="features/barChart.css">
+    <link rel="stylesheet" href="features/pieChart.css">
+    <style></style>
 </head>
 
 <body>
 <div class="container-fluid">
 
-    <div class="row section">
-        <div class="row">
-            <div class="col">Your Real-time Volume & Speech Speed</div>
+
+    <div class="row section meter" id="instant">
+        <div class="col-12">Volume<br><span class="sub-title text-end">peak within last two seconds: <span class="value"></span></span></div>
+        <div class="col-12">
+            <meter low="0.2" high="0.8" max="1" value="0"></meter>
+            <div class="coloverlay">
+                <span>|</span>
+            </div>
         </div>
-        <div class="row" id="instant">
-            <div class="col-4">Volume</div>
-            <div class="col-6">
-                <meter low="0.2" high="0.8" max="1" value="0" ></meter>
-                <div class="offset-4 col-6 coloverlay">
-                    <span>|</span>
+        <div class="col-12">
+            <i class="fa-solid fa-minus button" id="speak-softer"></i>
+            <i class="fa-solid fa-plus button float-end" id="speak-louder"></i>
+        </div>
+    </div>
+
+    <div class="row section meter" id="speechSpeed">
+        <div class="col-12">Speech Speed<br><span class="sub-title text-end value">average of last one sentence: <span class="value"></span></span></div>
+        <div class="col-12">
+            <meter min="60" low="80" high="140" max="160" value="0"></meter>
+        </div>
+        <div class="col-12">
+            <i class="fa-solid fa-minus button" id="speak-slower"></i>
+            <i class="fa-solid fa-plus button float-end" id="speak-faster"></i>
+        </div>
+    </div>
+
+    <div class="row m-0 p-0">
+        <div class="col-6 m-0 p-0">
+            <div class="row section left-half">
+                <div class="col-12 text-center">
+                    Playback<br><span class="sub-title">in headphone</span>
+                </div>
+                <audio id="player"></audio>
+                <div class="col-12 text-center mt-1">
+                    <span class="sub-title toggle-sub-title align-middle">off</span>
+                    <i id="loopback-toggle" class="fa-solid fa-toggle-off toggle align-middle"></i>
+                    <span class="sub-title toggle-sub-title align-middle">on</span>
                 </div>
             </div>
-            <div class="value col text-end"></div>
         </div>
-        <div class="row" id="speechSpeed">
-            <div class="col-4">Speech Speed (WPM)</div>
-            <div class="col-6">
-                <meter min="60" low="80" high="140" max="160" value="0"></meter>
-            </div>
-            <div class="value col text-end"></div>
-        </div>
-    </div>
-    <div class="row section">
-        <div class="row">
-            <div class="col">Enable Loopback</div>
-        </div>
-        <audio id="player"></audio>
-        <div class="row">
-            <div class="col-6"></div>
-            <div class="col-6 text-end">
-                <span class="description">Disable</span>
-                <i id="loopback-toggle" class="fa-solid fa-toggle-off text-end"></i>
-                <span class="description">Enable</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="row section">
-        <div class="row">
-            <div class="col">
-                Notify current/all presenter(s)
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-4 text-end" id="msg-submit-status-indication">
-                Please
-            </div>
-            <div class="col-8">
-                <span class="link-like-text" id="speak-louder">speak louder</span> <span class="link-like-text" id="speak-slower">speak slower</span> <span class="link-like-text" id="customise-msg">customise msg</span>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row section admin">
-        <div class="row">
-            <div class="col">Notify the participant to speak out when he/she start tying in chat</div>
-        </div>
-        <div class="row">
-            <div class="col-6"></div>
-            <div class="col-6 text-end">
-                <span class="description">Do not notify</span>
-                <i id="chat-toggle" class="fa-solid fa-toggle-off text-end"></i>
-                <span class="description">Notify</span>
+        <div class="col-6 m-0 p-0 end-0">
+            <div class="row section right-half">
+                <div class="col-12 text-center">
+                    Send Msg<br><span class="sub-title">to all/presenter(s)</span>
+                </div>
+                <div class="col-12 text-center mt-1">
+                    <span class="link-like-text" id="customise-msg">customise msg</span>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row section admin">
         <div class="row">
-            <div class="col">Usage of Voice V.S. Text Chat</div>
-        </div>
-        <div class="row">
-            <div class="col-4 text-end" id="voice">Voice</div>
-            <div class="col-6">
-                <meter id="usage" high="0.25" max="1" value="0"></meter>
+            <div class="col-10">
+                Notify Participants to Speak <br><span class="sub-title">when tying in chat</span>
             </div>
-            <div class="col-2" id="text">
-                Text
+
+            <div class="col-2 mx-auto my-auto">
+                <span class="link-like-text" id="chat-toggle">
+                    start
+                </span>
             </div>
         </div>
     </div>
 
-    <div class="row section admin">
-        <div class="row">
-            <div class="col">Speaking Durations & Last Speakers (minutes)</div>
+<!--    <div class="row section admin">-->
+<!--        <div class="row">-->
+<!--            <div class="col">Usage of Voice V.S. Text Chat</div>-->
+<!--        </div>-->
+<!--        <div class="row">-->
+<!--            <div class="col-4 text-end" id="voice">Voice</div>-->
+<!--            <div class="col-6">-->
+<!--                <meter id="usage" high="0.25" max="1" value="0"></meter>-->
+<!--            </div>-->
+<!--            <div class="col-2" id="text">-->
+<!--                Text-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+    <div class="row admin m-0 p-0">
+        <div class="col-7 m-0 p-0" >
+            <div class="row section left-half">
+                <div class="col-12 text-center">Speaking Durations<br><span class="sub-title">last speakers in green</span></div>
+                <div class="col-12 text-center my-1">
+                    <span class="sub-title toggle-sub-title align-middle">Descend</span>
+                    <i class="fa-solid fa-toggle-off toggle align-middle" id="durationToggle"></i>
+                    <span class="sub-title toggle-sub-title align-middle">Ascend</span>
+                </div>
+                <div class="col-12 mt-1">
+                    <div class="row" id="speaking_frequency"></div>
+                </div>
+            </div>
         </div>
-        <div class="row" id="speaking_frequency"></div>
-        <div class="row">
-            <div class="col-8 text-end offset-4">
-                <span style="color:grey">Descend</span>
-                <i class="fa-solid fa-toggle-off" id="durationToggle"></i>
-                <span style="color:black">Ascend</span>
+
+        <div class="col-5 m-0 p-0">
+            <div class="row section right-half">
+                <div class="col-12 text-center">Usage<br><span class="sub-title">Voice V.S. Chat</span></div>
+                <div class="col-12 text-center">
+                    <div class="pie my-2">
+
+                    </div>
+                </div>
+
+                <div class="col-10 offset-2">
+                    <i class="fa-solid fa-circle" style="color: #29CC97; font-size: xx-small"></i>
+                    <span class="sub-title align-middle" style="color: black">voice</span>
+                </div>
+
+                <div class="col-12 text-center">
+                    <span class="sub-title align-middle" id="voice"></span>
+                </div>
+
+                <div class="col-10 offset-2">
+                    <i class="fa-solid fa-circle" style="color: #FEC400; font-size: xx-small"></i>
+                    <span class="sub-title align-middle" style="color: black">chat</span>
+                </div>
+
+                <div class="col-12 text-center">
+                    <span class="sub-title align-middle" id="text"></span>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row section">
-        <div class="row">
-            <div class="col-4">
-                Etiquette
-            </div>
-            <div class="col-8" id="prompt-etiquette">
-                The participant maybe.../I demand...
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-2 text-center">
-                <i class="fa-regular fa-circle-question"></i>
-            </div>
-            <div class="col-2"></div>
-            <div class="col-7">
-                <input type="text" id="input-etiquette" class="input text-input" name="input-etiquette">
-            </div>
-            <div class="col-1">
-                <i class="fa fa-paper-plane" id="submit-etiquette" aria-hidden="true"></i>
-            </div>
-        </div>
-    </div>
 
-    <div class="row section admin">
-        <div class="row">
-            <div class="col">Incoming Etiquette</div>
+        <div class="col-12 pr-0 mr-0">
+            Accessibility Accommodations<br><span class="sub-title">submit your request</span>
         </div>
-        <div class="row" id="pending-etiquette-row">
+        <div class="col-12">
+            <input type="text" id="input-etiquette" class="input text-input" name="input-etiquette">
+        </div>
 
-        </div>
-    </div>
+        <div class="col-12 space admin"><br></div>
+        <div class="col admin mb-2">Incoming Etiquette</div>
+        <div class="row mx-0 etiquette admin" id="pending-etiquette-row"></div>
 
-    <div class="row section">
-        <div class="row">
-            <div class="col">Approved Etiquette</div>
-        </div>
-        <div class="row" id="approved-etiquette-row">
+        <div class="col-12 space"><br></div>
+        <div class="col-12 admin mb-2">Approved Etiquette</div>
+        <div class="row mx-0 etiquette" id="approved-etiquette-row">
 
         </div>
     </div>
@@ -160,25 +172,25 @@
 <!--        <span id="noteContent"></span>-->
 <!--    </div>-->
 
-<!--    <div>-->
-<!--        etiquette-->
-<!--        <i class="fa fa-paper-plane" id="test" aria-hidden="true"></i>-->
-<!--    </div>-->
+    <!--    <div>-->
+    <!--        etiquette-->
+    <!--        <i class="fa fa-paper-plane" id="test" aria-hidden="true"></i>-->
+    <!--    </div>-->
 
-<!--    <div>-->
-<!--        chatSpeakoutNotify-->
-<!--        <i class="fa fa-paper-plane" id="chatSpeakoutNotify" aria-hidden="true"></i>-->
-<!--    </div>-->
+    <!--    <div>-->
+    <!--        chatSpeakoutNotify-->
+    <!--        <i class="fa fa-paper-plane" id="chatSpeakoutNotify" aria-hidden="true"></i>-->
+    <!--    </div>-->
 
-<!--    <div class="admin">-->
-<!--        speak duration-->
-<!--        <i class="fa fa-paper-plane" id="speakingDuration" aria-hidden="true"></i>-->
-<!--    </div>-->
+    <!--    <div class="admin">-->
+    <!--        speak duration-->
+    <!--        <i class="fa fa-paper-plane" id="speakingDuration" aria-hidden="true"></i>-->
+    <!--    </div>-->
 
-<!--    <div class="admin">-->
-<!--        chat duration-->
-<!--        <i class="fa fa-paper-plane" id="chatDuration" aria-hidden="true"></i>-->
-<!--    </div>-->
+    <!--    <div class="admin">-->
+    <!--        chat duration-->
+    <!--        <i class="fa fa-paper-plane" id="chatDuration" aria-hidden="true"></i>-->
+    <!--    </div>-->
 
 </div>
 </body>

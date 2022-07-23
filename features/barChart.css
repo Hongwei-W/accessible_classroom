@@ -15,8 +15,8 @@
     /*border-bottom: 2px solid #aaa;*/
 }
 .grid .bar {
-    background-color: #F16335;
-    width: 10px;
+    background-color: #29CC97;
+    width: 2px;
     height: var(--bar-value);
     align-self: flex-end;
     margin: 0 auto;
@@ -41,11 +41,15 @@
     /*border-left: 2px solid #aaa;*/
 }
 .grid.horizontal .bar {
-    height: 25px;
+    height: 2px;
     width: var(--bar-value);
     align-self: flex-start;
     margin: auto 0 auto 0;
     border-radius: 0 3px 3px 0;
+}
+
+.sub-title.title {
+    color: black !important;
 }
 /*.grid.horizontal .bar::after {*/
 /*    top: initial;*/

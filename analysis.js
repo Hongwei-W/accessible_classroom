@@ -5,7 +5,6 @@ import { SoundMeter } from "./features/soundmeter.js";
 import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
 import {
     arrangeSpeakingDuration,
-    recentSpokenRetrieveHandler,
     totalDuration
 } from "./features/speakDuration.js";
 import {
@@ -78,6 +77,7 @@ const constraints = window.constraints = {
 let meterRefresh = null;
 let meterStopWatch = null;
 let speaking = false;
+let meterValue = [];
 
 function handleSoundMeterSuccess(stream) {
     // Put variables in global scope to make them available to the
@@ -90,8 +90,7 @@ function handleSoundMeterSuccess(stream) {
             return;
         }
         meterRefresh = setInterval(() => {
-            instantMeter.value = (soundMeter.slow).toFixed(2);
-            instantMeter.value = (soundMeter.slow * 20).toFixed(2);
+            meterValue.push(soundMeter.slow * 10);
         }, 200);
         meterStopWatch = setInterval(() => {
             let instantVolume = soundMeter.instant.toFixed(2);
@@ -101,6 +100,15 @@ function handleSoundMeterSuccess(stream) {
         }, 100);
     });
 }
+
+window.setInterval(() => {
+    if (meterValue.length != 0) {
+        let val = Math.max.apply(null, meterValue);
+        instantMeter.value = (val).toFixed(2);
+        instantValueDisplay.textContent = (val).toFixed(2) + " unit";
+        meterValue = [];
+    }
+}, 2000)
 
 function handleSoundMeterError(error) {
     console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
@@ -132,11 +140,13 @@ if (isAdmin) {
     chatToggle.addEventListener("click", function () {
         if (notifySpeakoutAdmin) {
             notifySpeakoutAdmin = false;
-            chatToggle.setAttribute("class", "fa-solid fa-toggle-off");
+            // chatToggle.setAttribute("class", "fa-solid fa-toggle-off");
+            chatToggle.textContent = "start";
             chatSpeakoutNotifySubmissionHandler(false);
         } else {
             notifySpeakoutAdmin = true;
-            chatToggle.setAttribute("class", "fa-solid fa-toggle-on");
+            // chatToggle.setAttribute("class", "fa-solid fa-toggle-on");
+            chatToggle.textContent = "stop";
             chatSpeakoutNotifySubmissionHandler(true);
         }
     })
@@ -198,7 +208,7 @@ loopbackToggle.addEventListener("click", function (){
 console.log("etiquette submission initializing");
 
 const inputEtiquette = document.getElementById("input-etiquette");
-const submitEtiquette = document.getElementById("submit-etiquette");
+// const submitEtiquette = document.getElementById("submit-etiquette");
 const promptEtiquette = document.getElementById("prompt-etiquette");
 const pendingEtiquetteRow = document.getElementById("pending-etiquette-row");
 const approvedEtiquetteRow = document.getElementById("approved-etiquette-row");
@@ -219,32 +229,36 @@ function etiquetteSubmissionHandler() {
         .then(function(data){
             console.log(data);
             inputEtiquette.value = '';
-            let statusIndicateMsg = 'Submit Succeeded, etiquette pending';
-            submitStatusIndicator(promptEtiquette, statusIndicateMsg);
+            let statusIndicateMsg = 'request submitted and is waiting for approval';
+            submitEtiquetteIndicator(statusIndicateMsg);
 
         })
         .catch(function(error) {
             console.log(error);
-            let statusIndicateMsg = 'Submit failed, please try again';
-            submitStatusIndicator(promptEtiquette, statusIndicateMsg);
+            let statusIndicateMsg = 'system failure caused fail of submission';
+            submitEtiquetteIndicator(statusIndicateMsg);
 
         })
 }
 
-submitEtiquette.addEventListener("click", function() {
-    if (inputEtiquette.value != '') {
-        etiquetteSubmissionHandler();
+inputEtiquette.addEventListener("keyup", function(event) {
+    if (event.key === "Enter") {
+        if (inputEtiquette.value.trim() != '') {
+            etiquetteSubmissionHandler();
+        }
+        else {
+            console.log("fail");
+            inputEtiquette.value = '';
+            submitEtiquetteIndicator("cannot submit blank etiquette");
+        }
     }
 })
 
-function submitStatusIndicator(node, successMsg) {
-
-    let original_content = node.textContent;
-    node.textContent = successMsg;
-    let interval = window.setTimeout(function() {
-            node.textContent = original_content;
-        },
-        2000)
+function submitEtiquetteIndicator(msg) {
+    inputEtiquette.placeholder = msg;
+    window.setTimeout(()=> {
+        inputEtiquette.placeholder = "";
+    }, 2000)
 }
 
 
@@ -290,17 +304,22 @@ function arrangeEtiquette(data) {
         for (let i = 0; i < pending_list.length; i++) {
 
             let col_div = document.createElement("div");
-            col_div.className = "col-auto etiquette-each";
-            let span_etiquette = document.createElement("span");
-            span_etiquette.className = "etiquette-sentence";
-            span_etiquette.textContent = pending_list[i][3];
+            col_div.className = "etiquette-each";
+            col_div.textContent = pending_list[i][3];
+            col_div.style.color = "grey";
+            let icon_div = document.createElement("div");
+            icon_div.className = "etiquette-side"
             let icon_approve = document.createElement("i");
-            icon_approve.className = "fa-solid fa-check";
+            icon_approve.className = "fa-solid fa-check fa-fw button";
             let icon_reject = document.createElement("i");
-            icon_reject.className = "fa-solid fa-xmark";
+            icon_reject.className = "fa-solid fa-xmark fa-fw button";
 
-            col_div.append(span_etiquette, icon_approve, icon_reject);
-            pendingEtiquetteRow.appendChild(col_div);
+            let line_breaker = document.createElement("div");
+            if (i != pending_list.length-1) {
+                line_breaker.className = "line-breaker";
+            }
+            icon_div.append(icon_reject, icon_approve);
+            pendingEtiquetteRow.append(col_div, icon_div, line_breaker);
             icon_approve.addEventListener('click', function (){
                 clickTickXUpvoteHandler(icon_approve, 'approve');
             });
@@ -316,34 +335,42 @@ function arrangeEtiquette(data) {
     let colorCoefficient = Math.ceil(approved_list.length / redColors.length);
     let reverseCounter = 0;
     for (let i = approved_list.length-1; i >= 0; i--) {
+        // let dummy_col_div = document.createElement("div");
+        // dummy_col_div.className = "col-12 mx-0 px-0";
 
-        let col_div = document.createElement("div");
-        col_div.className= "col-auto etiquette-each";
+        let etiquette_div = document.createElement("div");
+        etiquette_div.className= "etiquette-each";
         if (i != approved_list.length-1 && approved_list[i][2] == approved_list[i+1][2]) {
-            col_div.style.backgroundColor = approvedEtiquetteRow.firstChild.style.backgroundColor;
-            col_div.style.borderColor = approvedEtiquetteRow.firstChild.style.borderColor;
-            // colorCoefficient = Math.ceil(i / redColors.length);
+            etiquette_div.style.color = approvedEtiquetteRow.firstChild.style.color;
+            // etiquette_div.style.borderColor = approvedEtiquetteRow.firstChild.style.borderColor;
+
         } else {
-            col_div.style.backgroundColor = redColors[Math.floor((reverseCounter/colorCoefficient))];
-            col_div.style.borderColor = redColors[Math.floor((reverseCounter/colorCoefficient))];
-            // reverseCounter += 1;
+            etiquette_div.style.color = redColors[Math.floor((reverseCounter/colorCoefficient))];
+            // etiquette_div.style.borderColor = redColors[Math.floor((reverseCounter/colorCoefficient))];
         }
         reverseCounter += 1;
+        etiquette_div.textContent = approved_list[i][3];
+        // etiquette_div.style.color = "white";
 
-        let span_etiquette = document.createElement("span");
-        span_etiquette.className = "etiquette-sentence";
-        span_etiquette.textContent = approved_list[i][3];
-        span_etiquette.style.color = "white";
+        let icon_div = document.createElement("div");
+        icon_div.className = "etiquette-side"
         let icon = document.createElement("i");
-        icon.className = "fa-regular fa-bell";
+        icon.className = "fa-regular fa-bell fa-fw button";
         icon.style.color = "white";
         let span_count = document.createElement("span");
         span_count.className = "etiquette-count";
         span_count.textContent = approved_list[i][2];
-        span_count.style.color = "white";
 
-        col_div.append(span_etiquette, icon, span_count);
-        approvedEtiquetteRow.insertBefore(col_div, approvedEtiquetteRow.firstChild);
+        let line_breaker = document.createElement("div");
+        if (i != approved_list.length-1) {
+            line_breaker.className = "line-breaker";
+        }
+
+        icon_div.append(icon, span_count);
+        // dummy_col_div.append(etiquette_div, icon_div)
+        approvedEtiquetteRow.insertBefore(line_breaker, approvedEtiquetteRow.firstChild);
+        approvedEtiquetteRow.insertBefore(icon_div, approvedEtiquetteRow.firstChild);
+        approvedEtiquetteRow.insertBefore(etiquette_div, approvedEtiquetteRow.firstChild);
         icon.addEventListener('click', function (){
             clickTickXUpvoteHandler(icon, 'vote');
         });
@@ -354,7 +381,7 @@ function arrangeEtiquette(data) {
 
 function clickTickXUpvoteHandler(node, operation) {
     const div = node.parentNode;
-    const inputEtiquette = div.querySelector(".etiquette-sentence");
+    const inputEtiquette = div.querySelector(".etiquette-each");
 
     let details = {
         'sheet': 'etiquette',
@@ -375,16 +402,27 @@ function clickTickXUpvoteHandler(node, operation) {
 /* message submission */
 
 const speakLouderBtn = document.getElementById('speak-louder');
+const speakSofterBtn = document.getElementById('speak-softer');
+const speakFasterBtn = document.getElementById('speak-faster');
 const speakSlowerBtn = document.getElementById('speak-slower');
 const customiseMsgBtn = document.getElementById('customise-msg');
 const msgSubmitStatusIndicator = document.getElementById('msg-submit-status-indication');
+let msgContent = "For current speaker: please "
 
 speakLouderBtn.addEventListener('click', function() {
-    msgSubmissionHandler("For current speaker: please speak louder");
+    msgSubmissionHandler(msgContent + 'speak louder.');
 });
 
+speakSofterBtn.addEventListener('click', function () {
+    msgSubmissionHandler(msgContent + 'speak softer.');
+})
+
+speakFasterBtn.addEventListener('click', function () {
+    msgSubmissionHandler(msgContent + 'speak faster.');
+})
+
 speakSlowerBtn.addEventListener('click', function() {
-    msgSubmissionHandler("For current speaker: please speak slower");
+    msgSubmissionHandler(msgContent + 'speak slower.');
 });
 
 customiseMsgBtn.addEventListener('click', function() {
@@ -428,12 +466,12 @@ function msgSubmissionHandler(msg) {
         .then(function(data){
             console.log(data);
             const statusIndicateMsg = 'Post succeeded';
-            submitStatusIndicator(msgSubmitStatusIndicator, statusIndicateMsg);
+            // submitStatusIndicator(msgSubmitStatusIndicator, statusIndicateMsg);
         })
         .catch(function(error) {
             console.log(error);
             const statusIndicateMsg = 'Post failed';
-            submitStatusIndicator(msgSubmitStatusIndicator, statusIndicateMsg);
+            // submitStatusIndicator(msgSubmitStatusIndicator, statusIndicateMsg);
         })
 }
 
@@ -522,11 +560,16 @@ if (isAdmin) {
             .then(() => {
                 let speakingPercentage = ((totalDuration.speaking / (totalDuration.speaking + totalDuration.text)) * 100).toFixed(2);
                 let textPercentage = ((totalDuration.text / (totalDuration.speaking + totalDuration.text)) * 100).toFixed(2);
-                let usageScale = (totalDuration.speaking / (totalDuration.speaking + totalDuration.text)).toFixed(2);
+                let usageScale = (totalDuration.text / (totalDuration.speaking + totalDuration.text)).toFixed(2);
+                const head_style = document.head.getElementsByTagName("style")[0]
                 if (totalDuration.text !== 0 || totalDuration.speaking !== 0) {
-                    document.getElementById("voice").innerText = "Voice " + speakingPercentage + "%";
-                    document.getElementById("text").innerText = "Text " + textPercentage + "%";
-                    document.getElementById("usage").value = usageScale;
+                    document.getElementById("voice").innerText = speakingPercentage + "%";
+                    document.getElementById("text").innerText = textPercentage + "%";
+                    if (usageScale > 0.5) {
+                        head_style.innerHTML = ".pie::before {transform: rotate(" + (usageScale - 0.5) +"turn); background-color: #FEC400;}";
+                    } else {
+                        head_style.innerHTML = ".pie::before {transform: rotate(" + usageScale + "turn);} background-color: #inherit;";
+                    }
                 }
             })
     }, 5000);
