@@ -3,6 +3,50 @@ meter {
     position: relative;
 }
 
+html {
+    --soft: 20%;
+    --loud: 80%;
+    --slow: 20%;
+    --fast: 80%;
+    --dot: 24%;
+}
+
+#instant meter::-webkit-meter-bar{
+    /*background: none;*/
+    background-image:
+        linear-gradient(
+            90deg,
+            #e6d45066 var(--soft),
+            #8bcf6966 var(--soft),
+            #8bcf6966 var(--loud),
+            #f28f6866 var(--loud)
+        );
+}
+
+#speechSpeed meter::-webkit-meter-bar{
+    /*background: none;*/
+    background-image:
+        linear-gradient(
+            90deg,
+            #e6d45066 var(--slow),
+            #8bcf6966 var(--slow),
+            #8bcf6966 var(--fast),
+            #f28f6866 var(--fast)
+        );
+}
+
+#instant meter::-webkit-meter-optimum-value {
+    background-color: #29CC97;
+}
+
+#speechSpeed meter::-webkit-meter-optimum-value {
+    background-color: #FEC400;
+}
+
+#instant meter::-webkit-meter-suboptimum-value, #speechSpeed meter::-webkit-meter-suboptimum-value  {
+    background-color: #8B0000;
+}
+
 body {
     padding: 10px 10px;
     background-color: #F7F8FC !important;
@@ -34,20 +78,20 @@ body {
     color: white;
 }
 
-.meter#instant .button, .etiquette .button.fa-check, .etiquette .button.fa-bell {
+#instant .button, .etiquette .button.fa-check, .etiquette .button.fa-bell {
     background-color: #29CC97;
 }
 
-.meter#instant .button, .etiquette .button.fa-check, .etiquette .button.fa-bell:hover {
+#instant .button:hover, .etiquette .button.fa-check:hover, .etiquette .button.fa-bell:hover {
     background-color: #29CC97B3;
 }
 
 
-.meter#speechSpeed .button, .etiquette .button.fa-xmark {
+#speechSpeed .button, .etiquette .button.fa-xmark {
     background-color: #FEC400;
 }
 
-.meter#speechSpeed .button, .etiquette .button.fa-xmark:hover {
+#speechSpeed .button:hover, .etiquette .button.fa-xmark:hover {
     background-color: #FEC400B3;
 }
 
@@ -113,8 +157,8 @@ input:focus{
 
 .coloverlay{
     position: absolute;
-    top: 68px;
-    left: 25%;
+    top: 65px;
+    left: var(--dot);
     z-index:1;
     bottom:0;
     right:0;

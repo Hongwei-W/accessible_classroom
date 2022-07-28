@@ -1,6 +1,26 @@
 body {
-    min-width: 450px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    min-width: 210px;
 }
 
+.title {
+    font-weight: bolder;
+}
+
+#join {
+    background-color: #29CC97;
+}
+
+#join:hover {
+    background-color: #29CC97B3;
+}
+
+
+#admin {
+    color: #FEC400;
+    background-color: #F7F8FC;
+}
+
+#admin:hover {
+    color: #FEC400B3;
+    background-color: #F7F8FC !important;
+}

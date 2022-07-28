@@ -23,5 +23,10 @@ let greenColors = ['#4F7942', '#008000', '#228B22'];
 let themeGreen = "#29CC97";
 let opacity = ["CC", "99", "66"]
 let WPM = {'slow': 100, 'average': 130, 'fast': 160};
+let volumeRange = {"soft": 0.2, "loud": 0.8};
+let speechRateRange = {"slow": 80, "fast": 140};
+let volumeSoft = [0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3];
+let volumeSoftDot = {0.16: "20.5%", 0.18: "22.5%", 0.2: "24%", 0.22: "25.5%", 0.24: "27.5%", 0.26: "29.5%", 0.28: "31.5%", 0.3: "33%"};
+let rateSlow = [76, 78, 80, 82, 84, 86, 88, 90];
 
-export {findGetParameter, removeElements, redColors, greenColors, themeGreen, opacity, WPM};
+export {findGetParameter, removeElements, redColors, greenColors, themeGreen, opacity, WPM, volumeRange, speechRateRange, volumeSoft, volumeSoftDot, rateSlow};

@@ -1,7 +1,7 @@
 import {Stopwatch} from "./stopwatch.js";
 import {name} from "../analysis.js";
 import {accessible_classroom_general_gsheet, formEncoding, getHandler, postHandler} from "./utilitiesREST.js";
-import {greenColors, opacity, themeGreen} from "./utilities.js";
+import {greenColors, opacity, redColors, speechRateRange, themeGreen} from "./utilities.js";
 import {removeAllChildNodes} from "./utilitiesDOM.js";
 
 let stopwatch = new Stopwatch();
@@ -22,10 +22,25 @@ function stopStopwatch(length) {
         durationSubmissionHandler(duration, 'speaking_duration');
 
         // display speech speed
+        let val = (length/(duration/60000)).toFixed(2);
         const speechSpeedMeter = document.querySelector('#speechSpeed meter');
-        speechSpeedMeter.value = Math.round(length/(duration/60000));
+        speechSpeedMeter.value = Math.round(val);
         const speechSpeedValueDisplay = document.querySelector('#speechSpeed .value');
-        speechSpeedValueDisplay.textContent = (length/(duration/60000)).toFixed(2) + " WPM";
+        speechSpeedValueDisplay.textContent = val + " WPM";
+        const speechSpeedIndicator = document.querySelector('#speechSpeed #rate-indicator');
+        if (val > speechRateRange.fast) {
+            speechSpeedIndicator.textContent = "too fast";
+            speechSpeedIndicator.style.color = redColors[5];
+        } else if (val > speechRateRange.slow) {
+            speechSpeedIndicator.textContent = "just right";
+            speechSpeedIndicator.style.color = "#FEC400";
+        } else if (val < 50) {
+            // not going to tell anything when it is below the threshold
+            speechSpeedIndicator.textContent = "";
+        } else {
+            speechSpeedIndicator.textContent = "too slow";
+            speechSpeedIndicator.style.color = redColors[5];
+        }
     }
     stopwatch.reset();
 }

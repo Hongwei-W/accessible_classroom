@@ -1,8 +1,16 @@
 import { postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
 import { removeAllChildNodes } from "./features/utilitiesDOM.js";
-import {findGetParameter, redColors, removeElements, WPM} from "./features/utilities.js";
+import {
+    findGetParameter, rateSlow,
+    redColors,
+    removeElements, speechRateRange,
+    volumeRange,
+    volumeSoft,
+    volumeSoftDot,
+    WPM
+} from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
-import { chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler } from "./features/chatSpeakout.js";
+import { systemSettingsRetrieveHandler, systemSettingsSubmissionHandler } from "./features/chatSpeakout.js";
 import {
     arrangeSpeakingDuration,
     totalDuration
@@ -68,6 +76,7 @@ recognition.onresult = function(event) {
 
 const instantMeter = document.querySelector('#instant meter');
 const instantValueDisplay = document.querySelector('#instant .value');
+const instantIndicator = document.querySelector("#instant #volume-indicator");
 
 const constraints = window.constraints = {
     audio: true,
@@ -104,8 +113,21 @@ function handleSoundMeterSuccess(stream) {
 window.setInterval(() => {
     if (meterValue.length != 0) {
         let val = Math.max.apply(null, meterValue);
+        if (val < 0.1) {val = 0};
         instantMeter.value = (val).toFixed(2);
         instantValueDisplay.textContent = (val).toFixed(2) + " unit";
+        if (val == 0) {
+            instantIndicator.textContent = "";
+        } else if (val > volumeRange.loud) {
+            instantIndicator.textContent = "too loud";
+            instantIndicator.style.color = redColors[5];
+        } else if (val > volumeRange.soft) {
+            instantIndicator.textContent = "just right";
+            instantIndicator.style.color = "#29CC97";
+        } else {
+            instantIndicator.textContent = "too soft";
+            instantIndicator.style.color = redColors[5];
+        }
         meterValue = [];
     }
 }, 2000)
@@ -134,7 +156,6 @@ navigator.mediaDevices
 if (isAdmin) {
 
     /* Set "notify speakout" */
-
     let notifySpeakoutAdmin = false;
     const chatToggle = document.getElementById("chat-toggle");
     chatToggle.addEventListener("click", function () {
@@ -142,21 +163,37 @@ if (isAdmin) {
             notifySpeakoutAdmin = false;
             // chatToggle.setAttribute("class", "fa-solid fa-toggle-off");
             chatToggle.textContent = "start";
-            chatSpeakoutNotifySubmissionHandler(false);
+            systemSettingsSubmissionHandler("chat_speakout_notify", false);
         } else {
             notifySpeakoutAdmin = true;
             // chatToggle.setAttribute("class", "fa-solid fa-toggle-on");
             chatToggle.textContent = "stop";
-            chatSpeakoutNotifySubmissionHandler(true);
+            systemSettingsSubmissionHandler("chat_speakout_notify", true);
         }
     })
 
-    chatSpeakoutNotifySubmissionHandler(false);
+    let ccAdmin = false;
+    const ccToggle = document.getElementById("cc-toggle");
+    ccToggle.addEventListener('click', function() {
+        if (ccAdmin) {
+            ccAdmin = false;
+            ccToggle.textContent = "start";
+            systemSettingsSubmissionHandler("cc_notify", false);
+        } else {
+            ccAdmin = true;
+            ccToggle.textContent = "stop";
+            systemSettingsSubmissionHandler("cc_notify", true);
+        }
+    })
+
+    // set it to false (reset) when meeting starts
+    systemSettingsSubmissionHandler("chat_speakout_notify", false);
+    systemSettingsSubmissionHandler("cc_notify", false);
 }
 
 // no matter if is admin or not
 let retrieve_chatSpeakoutNotify = setInterval(function () {
-    chatSpeakoutNotifyRetrieveHandler();
+    systemSettingsRetrieveHandler();
 }, 1000)
 
 //use in developing
@@ -194,11 +231,11 @@ navigator.mediaDevices.getUserMedia(constraints).then(handleLoopbackSuccess).cat
 loopbackToggle.addEventListener("click", function (){
     if (soundOn) {
         soundOn = false;
-        loopbackToggle.setAttribute("class", "fa-solid fa-toggle-off");
+        loopbackToggle.setAttribute("class", "fa-solid fa-toggle-off toggle align-middle");
         player.pause();
     } else {
         soundOn = true;
-        loopbackToggle.setAttribute("class", "fa-solid fa-toggle-on");
+        loopbackToggle.setAttribute("class", "fa-solid fa-toggle-on toggle align-middle");
         player.play();
     }
 })
@@ -274,7 +311,7 @@ let retrieve_etiquette_from_gsheet = setInterval(function () {
         })
 }, 2000)
 
-// used for developing
+//used for developing
 // document.getElementById('test').addEventListener('click', function () {
 //     getHandler(accessible_classroom_general_gsheet + '?sheet=etiquette')
 //         .then(function(data){
@@ -381,7 +418,7 @@ function arrangeEtiquette(data) {
 
 function clickTickXUpvoteHandler(node, operation) {
     const div = node.parentNode;
-    const inputEtiquette = div.querySelector(".etiquette-each");
+    const inputEtiquette = div.previousSibling;
 
     let details = {
         'sheet': 'etiquette',
@@ -405,7 +442,7 @@ const speakLouderBtn = document.getElementById('speak-louder');
 const speakSofterBtn = document.getElementById('speak-softer');
 const speakFasterBtn = document.getElementById('speak-faster');
 const speakSlowerBtn = document.getElementById('speak-slower');
-const customiseMsgBtn = document.getElementById('customise-msg');
+let customiseMsgBtn = document.getElementById('customise-msg');
 const msgSubmitStatusIndicator = document.getElementById('msg-submit-status-indication');
 let msgContent = "For current speaker: please "
 
@@ -426,32 +463,30 @@ speakSlowerBtn.addEventListener('click', function() {
 });
 
 customiseMsgBtn.addEventListener('click', function() {
-    let row = customiseMsgBtn.parentNode.parentNode.parentNode
-    let newRowDiv = document.createElement('div');
-    newRowDiv.className = "row";
-    let newTextInputDiv = document.createElement('div');
-    newTextInputDiv.className = "col-7 offset-4";
+    let row = customiseMsgBtn.parentNode;
     let newTextInput = document.createElement('input');
+    row.removeChild(customiseMsgBtn);
     newTextInput.type = 'text';
     newTextInput.id = 'input-customise-msg';
-    newTextInput.class = 'input text-input';
+    newTextInput.className = 'input text-input';
     newTextInput.name = 'input-customise-msg';
-    newTextInputDiv.appendChild(newTextInput);
-    let newSendBtnDiv =  document.createElement('div');
-    newSendBtnDiv.className = "col-1";
-    let newSendBtn = document.createElement('i');
-    newSendBtn.className = "fa fa-paper-plane";
-    newSendBtn.id = 'submit-etiquette';
-    newSendBtn.setAttribute("aria-hidden", "true");
-    newSendBtnDiv.appendChild(newSendBtn)
-    newRowDiv.append(newTextInputDiv, newSendBtnDiv);
-    row.append(newRowDiv);
+    row.appendChild(newTextInput);
 
-    newSendBtn.addEventListener('click', function (){
-        if (newTextInput.value != '') {
-            msgSubmissionHandler(newTextInput.value);
+    newTextInput.addEventListener('keyup', function (event){
+        if (event.key === "Enter") {
+            if (newTextInput.value.trim() != '') {
+                newTextInput.placeholder = 'sent';
+                msgSubmissionHandler(newTextInput.value);
+                window.setTimeout(()=> {
+                    row.removeChild(newTextInput);
+                    row.appendChild(customiseMsgBtn);
+                }, 2000)
+            }
+            else {
+                console.log("fail");
+                newTextInput.placeholder = 'send failed';
+            }
         }
-        row.removeChild(newRowDiv);
     })
 })
 
@@ -506,6 +541,54 @@ function arrange_msg(data) {
         }
         timestemps.push(data[i][0]);
         notifications.push(data[i][1]);
+        if (data[i][1] === "For current speaker: please speak louder.") {
+            console.log("adjusting... loud");
+            let cur = volumeSoft.indexOf(volumeRange.soft);
+            // set dot, bar background, and meter low
+            if (cur == volumeSoft.length - 1) continue;
+            volumeRange.soft = volumeSoft[cur+1];
+            const html = document.getElementsByTagName("html")[0];
+            html.style.setProperty("--soft", volumeRange.soft * 100 + "%");
+            const meter = document.querySelector("#instant meter");
+            meter.setAttribute("low", volumeRange.soft);
+            html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+        }
+        else if (data[i][1] === "For current speaker: please speak softer.") {
+            console.log("adjusting... soft");
+            let cur = volumeSoft.indexOf(volumeRange.soft);
+            // set dot, bar background, and meter low
+            if (cur == 0) continue;
+            volumeRange.soft = volumeSoft[cur-1];
+            const html = document.getElementsByTagName("html")[0];
+            html.style.setProperty("--soft", volumeRange.soft * 100 + "%");
+            const meter = document.querySelector("#instant meter");
+            meter.setAttribute("low", volumeRange.soft);
+            html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+        }
+
+        else if (data[i][1] === "For current speaker: please speak faster.") {
+            console.log("adjusting... fast");
+            let cur = rateSlow.indexOf(speechRateRange.slow);
+            // set bar background, and meter low
+            if (cur == rateSlow.length - 1) continue;
+            speechRateRange.slow = rateSlow[cur+1];
+            const html = document.getElementsByTagName("html")[0];
+            html.style.setProperty("--slow", (speechRateRange.slow - 60) + "%");
+            const meter = document.querySelector("#speechSpeed meter");
+            meter.setAttribute("low", speechRateRange.slow);
+        }
+        else if (data[i][1] === "For current speaker: please speak slower.") {
+            console.log("adjusting... slow");
+            let cur = rateSlow.indexOf(speechRateRange.slow);
+            // set dot, bar background, and meter low
+            if (cur == 0) continue;
+            speechRateRange.slow = rateSlow[cur-1];
+            const html = document.getElementsByTagName("html")[0];
+            html.style.setProperty("--slow", (speechRateRange.slow - 60) + "%");
+            const meter = document.querySelector("#speechSpeed meter");
+            meter.setAttribute("low", speechRateRange.slow);
+        }
+
     }
 
     if (notifications.length !== 0) {
@@ -547,10 +630,10 @@ if (isAdmin) {
     durationSwitch.addEventListener("click", function() {
         if (durationAscend) {
             durationAscend = false;
-            durationSwitch.className = "fa-solid fa-toggle-off";
+            durationSwitch.className = "fa-solid fa-toggle-off toggle align-middle";
         } else {
             durationAscend = true;
-            durationSwitch.className = "fa-solid fa-toggle-on";
+            durationSwitch.className = "fa-solid fa-toggle-on toggle align-middle";
         }
         durationRetrieveHandler("speaking_duration", arrangeSpeakingDuration, durationAscend)
             .then(() => {})

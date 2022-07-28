@@ -1,5 +1,5 @@
-const join_btn = document.getElementById("join_button");
-const admin_btn = document.getElementById("admin_button");
+const join_btn = document.getElementById("join");
+const admin_btn = document.getElementById("admin");
 var login_btn = null;
 var name = null;
 var tabInfo = new Object();
@@ -46,7 +46,7 @@ join_btn.addEventListener('click', function (){
 function validateWelcomeForm() {
     let name = document.forms['welcomeForm']['name'].value;
     if (name == "") {
-        alert("Please enter your name");
+        document.getElementById("enter_name_input").placeholder = "please enter your name"
         return false;
     }
     return true;
@@ -63,19 +63,19 @@ admin_btn.addEventListener('click', function() {
     username_input.setAttribute("name", "username");
     username_input.value = '';
     username_input.setAttribute("placeholder", "username");
-    document.getElementById("then").textContent = "";
     let pwd_input = document.createElement("input");
     pwd_input.type = "password";
     pwd_input.name = "password";
+    pwd_input.className = "input text-input my-1"
     pwd_input.setAttribute("placeholder", "password");
-    document.getElementById("pwd").appendChild(pwd_input);
-    document.getElementById("join_button").remove();
-    login_btn = document.createElement("input");
-    login_btn.type = "button";
-    login_btn.className = "btn";
+    username_input.parentNode.append(pwd_input);
+    let login_row = document.getElementById("join").parentNode;
+    document.getElementById("join").remove();
+    document.getElementById("admin").remove();
+    login_btn = document.createElement("div");
+    login_btn.className = "col-10 mx-auto mt-3 my-1 link-like-text button text-center";
     login_btn.id = "login_button";
-    login_btn.name = "login_button";
-    login_btn.value = "Login";
+    login_btn.textContent = "login";
     login_btn.addEventListener('click', function (){
         if (validateJoinForm()) {
             window.close();
@@ -83,6 +83,7 @@ admin_btn.addEventListener('click', function() {
             document.getElementById('welcomeForm').submit();
         }
     })
+    login_row.append(login_btn);
     document.getElementById("join").appendChild(login_btn);
     document.getElementById("admin").remove();
     document.getElementById("or").textContent = "";

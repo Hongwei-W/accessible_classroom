@@ -7,24 +7,39 @@ import {
 import { tabId } from "../analysis.js";
 
 let notifySpeakout = false;
+let cc = false
 
-function chatSpeakoutNotifyRetrieveHandler() {
-    let url = accessible_classroom_general_gsheet + '?sheet=chat_speakout_notify';
+function systemSettingsRetrieveHandler() {
+    let url = accessible_classroom_general_gsheet + '?sheet=system_settings';;
     getHandler(url)
         .then(function(data){
             if (data.status == 'success') {
-                if (data.setting == true && notifySpeakout == false) {
+                if (data.speak_out == true && notifySpeakout == false) {
                     console.log('now turning chat-typing notify on');
                     chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'on'}, function (response) {
                         console.log((response.success));
                     });
                     notifySpeakout = true;
-                } else if (data.setting == false && notifySpeakout == true) {
+                } else if (data.speak_out == false && notifySpeakout == true) {
                     console.log('now turning chat-typing notify off');
                     chrome.tabs.sendMessage(tabId, {type: "listener", expectingStatus: 'off'}, function (response) {
                         console.log((response.success));
                     });
                     notifySpeakout = false;
+                }
+
+                if (data.cc == true && cc == false) {
+                    console.log('now turning cc notify on');
+                    chrome.tabs.sendMessage(tabId, {type: "cc", expectingStatus: 'on'}, function (response) {
+                        console.log((response.success));
+                    });
+                    cc = true;
+                } else if (data.cc == false && cc == true) {
+                    console.log('now turning cc notify off');
+                    chrome.tabs.sendMessage(tabId, {type: "cc", expectingStatus: 'off'}, function (response) {
+                        console.log((response.success));
+                    });
+                    cc = false;
                 }
             } else {
                 throw "app script gives status=false error";
@@ -35,11 +50,11 @@ function chatSpeakoutNotifyRetrieveHandler() {
         });
 }
 
-function chatSpeakoutNotifySubmissionHandler(val) {
+function systemSettingsSubmissionHandler(sheet, val) {
     console.log("submit chat needed to speak out request ");
 
     var details = {
-        'sheet': "chat_speakout_notify",
+        'sheet': sheet,
         'operation': 'update',
         'setting': val,
     }
@@ -54,4 +69,4 @@ function chatSpeakoutNotifySubmissionHandler(val) {
         })
 }
 
-export {chatSpeakoutNotifyRetrieveHandler, chatSpeakoutNotifySubmissionHandler};
+export {systemSettingsRetrieveHandler, systemSettingsSubmissionHandler};

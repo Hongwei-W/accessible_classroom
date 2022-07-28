@@ -1,5 +1,6 @@
 let chatTextarea = null;
 let chatTextareaSubmitBtn = null;
+let cc_notify = null;
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
@@ -23,6 +24,24 @@ chrome.runtime.onMessage.addListener(
                 sendResponse({success: false, error: e});
             }
         }
+        else if (request.type == 'cc') {
+            try {
+                if (request.expectingStatus == 'on') {
+                    setCCNotify();
+                } else {
+                    if (cc_notify) {
+                        clearInterval(cc_notify);
+                        cc_notify = null;
+                    }
+                }
+                sendResponse({success: true});
+            }
+            catch (e) {
+                console.log(e);
+                sendResponse({success: false, error: e});
+            }
+
+        }
         else if (request.type == 'initialize') {
             try {
                 const chatBtn = document.querySelector('[aria-label="Chat with everyone"]')
@@ -38,14 +57,6 @@ chrome.runtime.onMessage.addListener(
                     const chatCloseBtn = document.querySelector('[aria-label="Close"]');
                     chatCloseBtn.parentNode.removeChild(chatCloseBtn);
                 }, 1000);
-
-                window.setInterval(function() {
-                    const captionOnBtn = document.querySelector('[aria-label*="on captions"]');
-
-                    if (captionOnBtn) {
-                        alert("For better meeting experience, turn on caption (click CC button) for a live transcription")
-                    }
-                }, 120000);
 
                 sendResponse({success: true});
             }
@@ -73,13 +84,14 @@ chrome.runtime.onMessage.addListener(
 );
 
 function chatSpeakNotifyListenerHandler() {
-    let notifications = new Array();
-    notifications.push("Please speak out what you want to type in chat if it is not personal");
-    let notificationsJson = JSON.stringify(notifications);
-    chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
-        console.log('msg retrieve ');
-        console.log(response.success);
-    })
+    alert("Please speak out what you want to type in chat if it is not personal");
+    // let notifications = new Array();
+    // notifications.push("Please speak out what you want to type in chat if it is not personal");
+    // let notificationsJson = JSON.stringify(notifications);
+    // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
+    //     console.log('msg retrieve ');
+    //     console.log(response.success);
+    // })
 }
 
 function findChatTextArea() {
@@ -112,4 +124,13 @@ function enableChatTextCollecting() {
     })
 }
 
+function setCCNotify() {
+    cc_notify =  window.setInterval(function() {
+        const captionOnBtn = document.querySelector('[aria-label*="on captions"]');
+
+        if (captionOnBtn) {
+            alert("For better meeting experience, turn on caption (click CC button) for a live transcription")
+        }
+    }, 120000);
+}
 
