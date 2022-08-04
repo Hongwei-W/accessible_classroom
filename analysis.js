@@ -1,12 +1,12 @@
 import { postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
 import { removeAllChildNodes } from "./features/utilitiesDOM.js";
 import {
-    findGetParameter, rateSlow,
+    findGetParameter, rateRange, rateSlow,
     redColors,
     removeElements, speechRateRange,
     volumeRange,
     volumeSoft,
-    volumeSoftDot,
+    volumeSoftDot, volumeWidth, volumeWidthMid, volumeWidthSoft,
     WPM
 } from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
@@ -60,7 +60,7 @@ recognition.onerror = function(event) {
     if(event.error == 'no-speech') {
         console.log('No speech was detected. Try again.');
         recognitionOn = false;
-    };
+    }
 }
 
 recognition.onresult = function(event) {
@@ -110,23 +110,59 @@ function handleSoundMeterSuccess(stream) {
     });
 }
 
+const volumeMeterLow = document.querySelector("#instant.volume .suboptimal.low");
+const volumeMeterMid = document.querySelector("#instant.volume .optimal.mid");
+const volumeMeterHigh = document.querySelector("#instant.volume .suboptimal.high");
+const volumeMeterSpace = document.querySelectorAll("#instant.volume .space");
+const rateMeterLow = document.querySelector("#speechSpeed .suboptimal.low");
+const rateMeterMid = document.querySelector("#speechSpeed .optimal.mid");
+const rateMeterHigh = document.querySelector("#speechSpeed .suboptimal.high");
+const rateMeterSpace = document.querySelectorAll("#speechSpeed .space");
 window.setInterval(() => {
     if (meterValue.length != 0) {
         let val = Math.max.apply(null, meterValue);
         if (val < 0.1) {val = 0};
         instantMeter.value = (val).toFixed(2);
         instantValueDisplay.textContent = (val).toFixed(2) + " unit";
+        const softRange = volumeWidth.soft;
+        const rightRange = volumeWidth.mid;
+        const loudRange = volumeWidth.loud;
         if (val == 0) {
             instantIndicator.textContent = "";
+            // div meter
+            volumeMeterLow.setAttribute("style", `width: ${softRange}% !important; height: 10px !important; background-color: #FEC40066`);
+            volumeMeterMid.setAttribute("style", `width: ${rightRange}% !important; height: 10px !important; background-color: #29CC9766`);
+            volumeMeterHigh.setAttribute("style", `width: ${loudRange}% !important; height: 10px !important; background-color: #FEC40066`);
+            volumeMeterSpace[0].setAttribute("style", "width: 3% !important");
+            volumeMeterSpace[1].setAttribute("style", "width: 3% !important");
         } else if (val > volumeRange.loud) {
+            // text indicator
             instantIndicator.textContent = "too loud";
             instantIndicator.style.color = redColors[5];
+            // div meter
+            volumeMeterLow.setAttribute("style", `width: ${softRange}% !important; height: 10px !important; background-color: #FEC40066`);
+            volumeMeterMid.setAttribute("style", `width: ${rightRange}% !important; height: 10px !important; background-color: #29CC9766`);
+            volumeMeterHigh.setAttribute("style", `width: ${loudRange+3}% !important; height: 15px !important; background-color: #FEC400`);
+            volumeMeterSpace[0].setAttribute("style", "width: 1.5% !important");
+            volumeMeterSpace[1].setAttribute("style", "width: 1.5% !important");
         } else if (val > volumeRange.soft) {
             instantIndicator.textContent = "just right";
             instantIndicator.style.color = "#29CC97";
+
+            volumeMeterLow.setAttribute("style", `width: ${softRange}% !important; height: 10px !important; background-color: #FEC40066`);
+            volumeMeterMid.setAttribute("style", `width: ${rightRange+3}% !important; height: 15px !important; background-color: #29CC97`);
+            volumeMeterHigh.setAttribute("style", `width: ${loudRange}% !important; height: 10px !important; background-color: #FEC40066`);
+            volumeMeterSpace[0].setAttribute("style", "width: 1.5% !important");
+            volumeMeterSpace[1].setAttribute("style", "width: 1.5% !important");
         } else {
             instantIndicator.textContent = "too soft";
             instantIndicator.style.color = redColors[5];
+
+            volumeMeterLow.setAttribute("style", `width: ${softRange+3}% !important; height: 15px !important; background-color: #FEC400`);
+            volumeMeterMid.setAttribute("style", `width: ${rightRange}% !important; height: 10px !important; background-color: #29CC9766`);
+            volumeMeterHigh.setAttribute("style", `width: ${loudRange}% !important; height: 10px !important; background-color: #FEC40066`);
+            volumeMeterSpace[0].setAttribute("style", "width: 1.5% !important");
+            volumeMeterSpace[1].setAttribute("style", "width: 1.5% !important");
         }
         meterValue = [];
     }
@@ -552,6 +588,13 @@ function arrange_msg(data) {
             const meter = document.querySelector("#instant meter");
             meter.setAttribute("low", volumeRange.soft);
             html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+            // homemade meter
+            let current = volumeWidthSoft.indexOf(volumeWidth.soft);
+            if (current == volumeWidthSoft - 1) continue;
+            volumeWidth.soft = volumeWidthSoft[current+1];
+            volumeWidth.mid = volumeWidthMid[current+1];
+            volumeMeterLow.setAttribute("style", `width: ${volumeWidth.soft}% !important;`);
+            volumeMeterMid.setAttribute("style", `width: ${volumeWidth.mid}% !important;`);
         }
         else if (data[i][1] === "For current speaker: please speak softer.") {
             console.log("adjusting... soft");
@@ -564,6 +607,13 @@ function arrange_msg(data) {
             const meter = document.querySelector("#instant meter");
             meter.setAttribute("low", volumeRange.soft);
             html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+            // homemade meter
+            let current = volumeWidthSoft.indexOf(volumeWidth.soft);
+            if (current == 0) continue;
+            volumeWidth.soft = volumeWidthSoft[current-1];
+            volumeWidth.mid = volumeWidthMid[current-1];
+            volumeMeterLow.setAttribute("style", `width: ${volumeWidth.soft}% !important;`);
+            volumeMeterMid.setAttribute("style", `width: ${volumeWidth.mid}% !important;`);
         }
 
         else if (data[i][1] === "For current speaker: please speak faster.") {
@@ -576,6 +626,14 @@ function arrange_msg(data) {
             html.style.setProperty("--slow", (speechRateRange.slow - 60) + "%");
             const meter = document.querySelector("#speechSpeed meter");
             meter.setAttribute("low", speechRateRange.slow);
+            // homemade meter: use variable `rateRange`
+            let current = volumeWidthSoft.indexOf(rateRange.slow-60);
+            if (current == volumeWidthSoft.length - 1) continue;
+            rateRange.slow = volumeWidthSoft[current+1]+60;
+            const slowWidth = rateRange.slow - 60;
+            const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
+            rateMeterLow.setAttribute("style", `width: ${slowWidth}% !important;`);
+            rateMeterMid.setAttribute("style", `width: ${midWidth}% !important;`);
         }
         else if (data[i][1] === "For current speaker: please speak slower.") {
             console.log("adjusting... slow");
@@ -587,6 +645,14 @@ function arrange_msg(data) {
             html.style.setProperty("--slow", (speechRateRange.slow - 60) + "%");
             const meter = document.querySelector("#speechSpeed meter");
             meter.setAttribute("low", speechRateRange.slow);
+            // homemade meter
+            let current = volumeWidthSoft.indexOf(rateRange.slow-60);
+            if (current == 0) continue;
+            rateRange.slow = volumeWidthSoft[current-1]+60;
+            const slowWidth = rateRange.slow - 60;
+            const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
+            rateMeterLow.setAttribute("style", `width: ${slowWidth}% !important;`);
+            rateMeterMid.setAttribute("style", `width: ${midWidth}% !important;`);
         }
 
     }

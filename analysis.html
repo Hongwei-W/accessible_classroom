@@ -19,17 +19,24 @@
 <div class="container-fluid">
 
 
-    <div class="row section meter" id="instant">
+    <div class="row section volume" id="instant">
         <div class="col-12">
             <span style="width: 50% !important;">Volume</span>&nbsp;
             <span style="width: 50% !important; font-weight: bold;" id="volume-indicator"></span>
         </div>
-        <div class="col-12 sub-title">peak within last two seconds: <span class="value"></span></div>
+        <div class="col-12 sub-title">volume peak within last two seconds: <span class="value"></span></div>
         <div class="col-12">
             <meter low="0.2" high="0.8" max="1" value="0"></meter>
             <div class="coloverlay">
-                <span>|</span>
+                <i class="fa-solid fa-circle" style="font-size: small; color: grey"></i>
             </div>
+        </div>
+        <div class="col-12 meter">
+            <div class="suboptimal low"></div><!--
+            --><div class="space" style="width: 3% !important;"></div><!--
+            --><div class="optimal mid"></div><!--
+            --><div class="space"  style="width: 3% !important;"></div><!--
+            --><div class="suboptimal high"></div>
         </div>
         <div class="col-12">
             <i class="fa-solid fa-minus button" id="speak-softer"></i>
@@ -37,14 +44,21 @@
         </div>
     </div>
 
-    <div class="row section meter" id="speechSpeed">
+    <div class="row section" id="speechSpeed">
         <div class="col-12">
             <span style="width: 50% !important;">Speech Speed</span>&nbsp;
             <span style="width: 50% !important; font-weight: bold;" id="rate-indicator"></span>
         </div>
-        <div class="sub-title col-12">average of last one sentence: <span class="value"></span></div>
-        <div class="col-12">
+        <div class="sub-title col-12">speech speed average of last sentence: <span class="value"></span></div>
+        <div class="col-12" hidden>
             <meter min="60" low="80" high="140" max="160" value="0"></meter>
+        </div>
+        <div class="col-12 meter">
+            <div class="suboptimal low"></div><!--
+            --><div class="space" style="width: 3% !important;"></div><!--
+            --><div class="optimal mid"></div><!--
+            --><div class="space"  style="width: 3% !important;"></div><!--
+            --><div class="suboptimal high"></div>
         </div>
         <div class="col-12">
             <i class="fa-solid fa-minus button" id="speak-slower"></i>
@@ -81,7 +95,7 @@
     <div class="row section admin">
         <div class="row">
             <div class="col-10">
-                Notify Participants to Speak <br><span class="sub-title">when tying in chat</span>
+                Keep Text Chat to a Minimum<br><span class="sub-title">sends reminder to participants to speak instead of text chat during session</span>
             </div>
 
             <div class="col-2 mx-auto my-auto">
@@ -95,7 +109,7 @@
     <div class="row section admin">
         <div class="row">
             <div class="col-10">
-                Notify Participants for CC <br><span class="sub-title">check and remind to turn on </span>
+                Request Closed Captioning<br><span class="sub-title">sends everyone reminder to turn on CC</span>
             </div>
 
             <div class="col-2 mx-auto my-auto">
@@ -124,7 +138,7 @@
     <div class="row admin m-0 p-0">
         <div class="col-7 m-0 p-0" >
             <div class="row section left-half">
-                <div class="col-12 text-center">Speaking Durations<br><span class="sub-title">last speakers in green</span></div>
+                <div class="col-12 text-center">How Long Has Everyone Been Speaking?<br><span class="sub-title">last speakers in green</span></div>
                 <div class="col-12 text-center my-1">
                     <span class="sub-title toggle-sub-title align-middle">Descend</span>
                     <i class="fa-solid fa-toggle-off toggle align-middle" id="durationToggle"></i>
@@ -138,7 +152,7 @@
 
         <div class="col-5 m-0 p-0">
             <div class="row section right-half">
-                <div class="col-12 text-center">Usage<br><span class="sub-title">Voice V.S. Chat</span></div>
+                <div class="col-12 text-center">Are People Texting or Speaking?<br><span class="sub-title">voice vs text</span></div>
                 <div class="col-12 text-center">
                     <div class="pie my-2">
 
@@ -156,7 +170,7 @@
 
                 <div class="col-10 offset-2">
                     <i class="fa-solid fa-circle" style="color: #FEC400; font-size: xx-small"></i>
-                    <span class="sub-title align-middle" style="color: black">chat</span>
+                    <span class="sub-title align-middle" style="color: black">text</span>
                 </div>
 
                 <div class="col-12 text-center">

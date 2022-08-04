@@ -1,7 +1,15 @@
 import {Stopwatch} from "./stopwatch.js";
 import {name} from "../analysis.js";
 import {accessible_classroom_general_gsheet, formEncoding, getHandler, postHandler} from "./utilitiesREST.js";
-import {greenColors, opacity, redColors, speechRateRange, themeGreen} from "./utilities.js";
+import {
+    greenColors,
+    opacity, rateRange,
+    redColors,
+    speechRateRange,
+    themeGreen,
+    volumeWidthMid,
+    volumeWidthSoft
+} from "./utilities.js";
 import {removeAllChildNodes} from "./utilitiesDOM.js";
 
 let stopwatch = new Stopwatch();
@@ -22,6 +30,13 @@ function stopStopwatch(length) {
         durationSubmissionHandler(duration, 'speaking_duration');
 
         // display speech speed
+        const meterLow = document.querySelector("#speechSpeed .suboptimal.low");
+        const meterMid = document.querySelector("#speechSpeed .optimal.mid");
+        const meterHigh = document.querySelector("#speechSpeed .suboptimal.high");
+        const space = document.querySelectorAll("#speechSpeed .space");
+        const slowWidth = rateRange.slow - 60;
+        const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
+
         let val = (length/(duration/60000)).toFixed(2);
         const speechSpeedMeter = document.querySelector('#speechSpeed meter');
         speechSpeedMeter.value = Math.round(val);
@@ -31,15 +46,39 @@ function stopStopwatch(length) {
         if (val > speechRateRange.fast) {
             speechSpeedIndicator.textContent = "too fast";
             speechSpeedIndicator.style.color = redColors[5];
+
+            meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+            meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
+            meterHigh.setAttribute("style", `width: 23% !important; height: 15px !important; background-color: #FEC400`);
+            space[0].setAttribute("style", "width: 1.5% !important");
+            space[1].setAttribute("style", "width: 1.5% !important");
         } else if (val > speechRateRange.slow) {
             speechSpeedIndicator.textContent = "just right";
-            speechSpeedIndicator.style.color = "#FEC400";
+            speechSpeedIndicator.style.color = "#29CC97";
+
+            meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+            meterMid.setAttribute("style", `width: ${midWidth+3}% !important; height: 15px !important; background-color: #29CC97`);
+            meterHigh.setAttribute("style", `width: 20% !important; height: 10px !important; background-color: #FEC40066`);
+            space[0].setAttribute("style", "width: 1.5% !important");
+            space[1].setAttribute("style", "width: 1.5% !important");
         } else if (val < 50) {
             // not going to tell anything when it is below the threshold
             speechSpeedIndicator.textContent = "";
+
+            meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+            meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
+            meterHigh.setAttribute("style", `width: 20% !important; height: 10px !important; background-color: #FEC40066`);
+            space[0].setAttribute("style", "width: 3% !important");
+            space[1].setAttribute("style", "width: 3% !important");
         } else {
             speechSpeedIndicator.textContent = "too slow";
             speechSpeedIndicator.style.color = redColors[5];
+
+            meterLow.setAttribute("style", `width: ${slowWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
+            meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
+            meterHigh.setAttribute("style", `width: 20% !important; height: 10px !important; background-color: #FEC40066`);
+            space[0].setAttribute("style", "width: 1.5% !important");
+            space[1].setAttribute("style", "width: 1.5% !important");
         }
     }
     stopwatch.reset();

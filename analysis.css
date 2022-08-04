@@ -35,6 +35,43 @@ html {
         );
 }
 
+.suboptimal {
+    display: inline-block;
+}
+
+.optimal {
+    display: inline-block;
+}
+
+.space {
+    height: 10px !important;
+    display: inline-block;
+}
+
+.suboptimal.high {
+    border-radius: 0 5px 5px 0;
+    width: 20% !important;
+    background-color: #FEC40066;
+    height: 10px !important;
+}
+
+.suboptimal.low {
+    border-radius: 5px 0 0 5px;
+    width: 20% !important;
+    background-color: #FEC40066;
+    height: 10px !important;
+}
+
+.optimal.mid {
+    width: 54% !important;
+    background-color: #29CC9766;
+    height: 10px !important;
+}
+
+.meter > * {
+    vertical-align: middle;
+}
+
 #instant meter::-webkit-meter-optimum-value {
     background-color: #29CC97;
 }
@@ -69,7 +106,7 @@ body {
     margin-left: 4px !important;
 }
 
-.meter .button{
+#instant .button, #speechSpeed .button{
     border-radius: 50%;
     padding: 5px;
     margin: 4px;
@@ -157,7 +194,7 @@ input:focus{
 
 .coloverlay{
     position: absolute;
-    top: 65px;
+    top: 64px;
     left: var(--dot);
     z-index:1;
     bottom:0;
