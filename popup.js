@@ -19,16 +19,21 @@ function retrieveTabInfo() {
 function notGoogleMeet() {
     console.log("not Google Meet");
     document.getElementsByClassName("container-fluid")[0].remove();
+
     let container = document.createElement("div");
     container.className = "container-fluid";
     let row = document.createElement("div");
     row.className = "row";
     let col1 = document.createElement("div");
     col1.className = "col-12";
-    col1.innerText = "This is not a Google meet page, please open a google meet page and try again";
+    let span = document.createElement("span");
+    span.innerText = "Not Google Meet";
+    span.style.fontSize = "larger";
+    col1.append(span);
     let col2 = document.createElement("div");
-    col2.className = "col-12";
+    col2.className = "col-12 section";
     col2.innerText = "This extension only works with google meet page, for now";
+    col2.style.fontSize = "smaller";
     row.append(col1, col2);
     container.append(row);
     document.body.appendChild(container);

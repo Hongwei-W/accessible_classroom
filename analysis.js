@@ -1,12 +1,12 @@
 import { postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
 import { removeAllChildNodes } from "./features/utilitiesDOM.js";
 import {
-    findGetParameter, rateRange, rateSlow,
+    findGetParameter, rateMax, rateMin, rateRange, rateSlow,
     redColors,
     removeElements, speechRateRange,
     volumeRange,
     volumeSoft,
-    volumeSoftDot, volumeWidth, volumeWidthMid, volumeWidthSoft,
+    volumeSoftDot, volumeWidth, volumeWidthLoud, volumeWidthMid, volumeWidthSoft,
     WPM
 } from "./features/utilities.js";
 import { SoundMeter } from "./features/soundmeter.js";
@@ -358,6 +358,8 @@ let retrieve_etiquette_from_gsheet = setInterval(function () {
 //         })
 // })
 
+let etiquetteDictionary = {};
+
 function arrangeEtiquette(data) {
     let pending_list = new Array();
     let approved_list = new Array();
@@ -408,22 +410,17 @@ function arrangeEtiquette(data) {
     let colorCoefficient = Math.ceil(approved_list.length / redColors.length);
     let reverseCounter = 0;
     for (let i = approved_list.length-1; i >= 0; i--) {
-        // let dummy_col_div = document.createElement("div");
-        // dummy_col_div.className = "col-12 mx-0 px-0";
 
         let etiquette_div = document.createElement("div");
         etiquette_div.className= "etiquette-each";
         if (i != approved_list.length-1 && approved_list[i][2] == approved_list[i+1][2]) {
             etiquette_div.style.color = approvedEtiquetteRow.firstChild.style.color;
-            // etiquette_div.style.borderColor = approvedEtiquetteRow.firstChild.style.borderColor;
 
         } else {
             etiquette_div.style.color = redColors[Math.floor((reverseCounter/colorCoefficient))];
-            // etiquette_div.style.borderColor = redColors[Math.floor((reverseCounter/colorCoefficient))];
         }
         reverseCounter += 1;
         etiquette_div.textContent = approved_list[i][3];
-        // etiquette_div.style.color = "white";
 
         let icon_div = document.createElement("div");
         icon_div.className = "etiquette-side"
@@ -470,6 +467,15 @@ function clickTickXUpvoteHandler(node, operation) {
         .catch(function (error) {
             console.log((error))
         })
+
+    if (operation === "approve" || operation === "vote") {
+        let notifications = new Array();
+        notifications.push(inputEtiquette.textContent);
+        let notificationsJson = JSON.stringify(notifications);
+        chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
+            console.log(response.success);
+        })
+    }
 }
 
 /* message submission */
@@ -590,11 +596,13 @@ function arrange_msg(data) {
             html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
             // homemade meter
             let current = volumeWidthSoft.indexOf(volumeWidth.soft);
-            if (current == volumeWidthSoft - 1) continue;
+            if (current == volumeWidthSoft.length - 1) continue;
             volumeWidth.soft = volumeWidthSoft[current+1];
             volumeWidth.mid = volumeWidthMid[current+1];
+            volumeWidth.loud = volumeWidthLoud[current+1];
             volumeMeterLow.setAttribute("style", `width: ${volumeWidth.soft}% !important;`);
             volumeMeterMid.setAttribute("style", `width: ${volumeWidth.mid}% !important;`);
+            volumeMeterHigh.setAttribute("style", `width: ${volumeWidth.loud}% !important;`);
         }
         else if (data[i][1] === "For current speaker: please speak softer.") {
             console.log("adjusting... soft");
@@ -612,8 +620,10 @@ function arrange_msg(data) {
             if (current == 0) continue;
             volumeWidth.soft = volumeWidthSoft[current-1];
             volumeWidth.mid = volumeWidthMid[current-1];
+            volumeWidth.loud = volumeWidthLoud[current-1];
             volumeMeterLow.setAttribute("style", `width: ${volumeWidth.soft}% !important;`);
             volumeMeterMid.setAttribute("style", `width: ${volumeWidth.mid}% !important;`);
+            volumeMeterHigh.setAttribute("style", `width: ${volumeWidth.loud}% !important;`);
         }
 
         else if (data[i][1] === "For current speaker: please speak faster.") {
@@ -629,11 +639,15 @@ function arrange_msg(data) {
             // homemade meter: use variable `rateRange`
             let current = volumeWidthSoft.indexOf(rateRange.slow-60);
             if (current == volumeWidthSoft.length - 1) continue;
-            rateRange.slow = volumeWidthSoft[current+1]+60;
-            const slowWidth = rateRange.slow - 60;
-            const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
+            rateRange.slow = volumeWidthSoft[current+1] + rateMin;
+            rateRange.fast = rateMax - volumeWidthLoud[current+1];
+            const slowWidth = volumeWidthSoft[current+1];
+            const midWidth = volumeWidthMid[current+1];
+            const fastWidth = volumeWidthLoud[current+1];
+            console.log(slowWidth, midWidth, fastWidth);
             rateMeterLow.setAttribute("style", `width: ${slowWidth}% !important;`);
             rateMeterMid.setAttribute("style", `width: ${midWidth}% !important;`);
+            rateMeterHigh.setAttribute("style", `width: ${fastWidth}% !important;`);
         }
         else if (data[i][1] === "For current speaker: please speak slower.") {
             console.log("adjusting... slow");
@@ -648,23 +662,26 @@ function arrange_msg(data) {
             // homemade meter
             let current = volumeWidthSoft.indexOf(rateRange.slow-60);
             if (current == 0) continue;
-            rateRange.slow = volumeWidthSoft[current-1]+60;
-            const slowWidth = rateRange.slow - 60;
-            const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
+            rateRange.slow = volumeWidthSoft[current-1] + rateMin;
+            rateRange.fast = rateMax - volumeWidthLoud[current-1];
+            const slowWidth = volumeWidthSoft[current-1];
+            const midWidth = volumeWidthMid[current-1];
+            const fastWidth = volumeWidthLoud[current-1];
             rateMeterLow.setAttribute("style", `width: ${slowWidth}% !important;`);
             rateMeterMid.setAttribute("style", `width: ${midWidth}% !important;`);
+            rateMeterHigh.setAttribute("style", `width: ${fastWidth}% !important;`);
         }
 
     }
 
     if (notifications.length !== 0) {
         let notificationsJson = JSON.stringify(notifications);
-        // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
-        //     console.log(response.success);
-        // })
-        chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
+        chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
             console.log(response.success);
         })
+        // chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
+        //     console.log(response.success);
+        // })
     }
 }
 

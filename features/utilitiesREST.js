@@ -30,7 +30,7 @@ function formEncoding(details) {
 }
 
 const accessible_classroom_general_gsheet =
-    'https://script.google.com/macros/s/AKfycbyFsEnr1XM4sEc9_LsmHfgK0nRHrTRgGV8yn1HoRCP6LMaTxsIaSNh9vITRQNVd3sdP/exec';
+    'https://script.google.com/macros/s/AKfycbx-eJ9MTnf_kogR8n3ucoLDFuIuVmEDPjUSF1Nvp4HPzrz9NI3qJbywETltkwxBVz1L/exec';
 
 const accessible_classroom_message_gsheet =
     'https://script.google.com/macros/s/AKfycbwoCR3wKZlhQbNN24unWFyAxcOSW_zDXkA4AEVzcccJLDIXFO9KhsjY_p5Xyr7WU2s/exec';

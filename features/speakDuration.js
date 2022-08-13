@@ -6,7 +6,7 @@ import {
     opacity, rateRange,
     redColors,
     speechRateRange,
-    themeGreen,
+    themeGreen, volumeWidthLoud,
     volumeWidthMid,
     volumeWidthSoft
 } from "./utilities.js";
@@ -36,6 +36,7 @@ function stopStopwatch(length) {
         const space = document.querySelectorAll("#speechSpeed .space");
         const slowWidth = rateRange.slow - 60;
         const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
+        const fastWidth = volumeWidthLoud[volumeWidthSoft.indexOf(slowWidth)];
 
         let val = (length/(duration/60000)).toFixed(2);
         const speechSpeedMeter = document.querySelector('#speechSpeed meter');
@@ -49,7 +50,7 @@ function stopStopwatch(length) {
 
             meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
-            meterHigh.setAttribute("style", `width: 23% !important; height: 15px !important; background-color: #FEC400`);
+            meterHigh.setAttribute("style", `width: ${fastWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
             space[0].setAttribute("style", "width: 1.5% !important");
             space[1].setAttribute("style", "width: 1.5% !important");
         } else if (val > speechRateRange.slow) {
@@ -58,7 +59,7 @@ function stopStopwatch(length) {
 
             meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             meterMid.setAttribute("style", `width: ${midWidth+3}% !important; height: 15px !important; background-color: #29CC97`);
-            meterHigh.setAttribute("style", `width: 20% !important; height: 10px !important; background-color: #FEC40066`);
+            meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             space[0].setAttribute("style", "width: 1.5% !important");
             space[1].setAttribute("style", "width: 1.5% !important");
         } else if (val < 50) {
@@ -67,7 +68,7 @@ function stopStopwatch(length) {
 
             meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
-            meterHigh.setAttribute("style", `width: 20% !important; height: 10px !important; background-color: #FEC40066`);
+            meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             space[0].setAttribute("style", "width: 3% !important");
             space[1].setAttribute("style", "width: 3% !important");
         } else {
@@ -76,7 +77,7 @@ function stopStopwatch(length) {
 
             meterLow.setAttribute("style", `width: ${slowWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
             meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
-            meterHigh.setAttribute("style", `width: 20% !important; height: 10px !important; background-color: #FEC40066`);
+            meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             space[0].setAttribute("style", "width: 1.5% !important");
             space[1].setAttribute("style", "width: 1.5% !important");
         }

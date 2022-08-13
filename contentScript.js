@@ -67,11 +67,26 @@ chrome.runtime.onMessage.addListener(
         }
         else if (request.type == 'alert') {
             try {
+                // let msgs = JSON.parse(request.content);
+                // let len = msgs.length;
+                //
+                // for (let i = 0; i < len; i++) {
+                //     alert(msgs[i]);
+                // }
+                // sendResponse({success: true});
+
                 let msgs = JSON.parse(request.content);
                 let len = msgs.length;
 
                 for (let i = 0; i < len; i++) {
-                    alert(msgs[i]);
+                    const page = window.open('alert.html')
+
+                    page.addEventListener('DOMContentLoaded', () => {
+                        // Now we can access the #test element on the other page
+                        const div = page.document.getElementById("alert");
+                        div.innerText(msgs[i]);
+                    })
+                    chrome.tabs.create({ url: "alert.html" , type:"popup"});
                 }
                 sendResponse({success: true});
             }
@@ -84,7 +99,7 @@ chrome.runtime.onMessage.addListener(
 );
 
 function chatSpeakNotifyListenerHandler() {
-    alert("Please speak out what you want to type in chat if it is not personal");
+    alert("Please keep text chat to a minimum. If you have a question or comment, raise your hand and wait to speak.");
     // let notifications = new Array();
     // notifications.push("Please speak out what you want to type in chat if it is not personal");
     // let notificationsJson = JSON.stringify(notifications);
@@ -129,7 +144,7 @@ function setCCNotify() {
         const captionOnBtn = document.querySelector('[aria-label*="on captions"]');
 
         if (captionOnBtn) {
-            alert("For better meeting experience, turn on caption (click CC button) for a live transcription")
+            alert("Make the meeting experience better for everyone by turning on captions. Click CC button at the bottom of the screen.");
         }
     }, 120000);
 }
