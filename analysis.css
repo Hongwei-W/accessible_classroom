@@ -236,3 +236,45 @@ input:focus{
     width: 25% !important;
     max-width: 25% !important;
 }
+
+.container-popup {
+    position: relative;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(0,0,0,.8);
+}
+
+.popup {
+    width: 70%;
+    height: 20%;
+    background: #FEC40050;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    border-radius: 10px;
+}
+
+.close-popup {
+    width: 0;
+    height: 0;
+    color: #29CC97;
+    position: relative;
+    font-size: x-large;
+    margin: 10px;
+}
+
+.close-msg {
+    width: 0;
+    height: 0;
+    color: #29CC97;
+    position: relative;
+    font-size: x-large;
+    margin-left: 10px;
+    margin-top: 10px;
+}

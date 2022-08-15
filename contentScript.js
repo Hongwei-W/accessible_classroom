@@ -48,14 +48,40 @@ chrome.runtime.onMessage.addListener(
                 if (document.getElementsByTagName('textarea').length == 0) {
                     chatBtn.click();
                 }
-                chatBtn.parentNode.removeChild(chatBtn);
+                if (chatBtn) chatBtn.parentNode.removeChild(chatBtn);
+
+                const infoBtns = document.querySelectorAll('[aria-label="Meeting details"]');
+                for (let i = 0; i < infoBtns.length; i++) {
+                    if (infoBtns[i].tagName == "BUTTON") {
+                        infoBtns[i].remove();
+                        break;
+                    }
+                }
+
+                const peopleBtns = document.querySelectorAll('[aria-label="Show everyone"]');
+                for (let i=0; i < peopleBtns.length; i++) {
+                    if (peopleBtns[i].tagName == "BUTTON") {
+                        peopleBtns[i].parentNode.nextSibling.remove();
+                        peopleBtns[i].remove();
+                        break;
+                    }
+                }
+
+                const activitiesBtns = document.querySelectorAll('[aria-label="Activities"]');
+                for (let i=0; i < activitiesBtns.length; i++) {
+                    if (activitiesBtns[i].tagName == "BUTTON") {
+                        activitiesBtns[i].remove();
+                        break;
+                    }
+                }
+
                 window.setTimeout(function () {
                     /* bind a listener to "send" button, wait for page to load*/
                     findChatTextArea();
                     enableChatTextCollecting();
 
                     const chatCloseBtn = document.querySelector('[aria-label="Close"]');
-                    chatCloseBtn.parentNode.removeChild(chatCloseBtn);
+                    if (chatCloseBtn) chatCloseBtn.parentNode.removeChild(chatCloseBtn);
                 }, 1000);
 
                 sendResponse({success: true});
@@ -67,28 +93,37 @@ chrome.runtime.onMessage.addListener(
         }
         else if (request.type == 'alert') {
             try {
-                // let msgs = JSON.parse(request.content);
-                // let len = msgs.length;
-                //
-                // for (let i = 0; i < len; i++) {
-                //     alert(msgs[i]);
-                // }
-                // sendResponse({success: true});
-
                 let msgs = JSON.parse(request.content);
                 let len = msgs.length;
 
                 for (let i = 0; i < len; i++) {
-                    const page = window.open('alert.html')
-
-                    page.addEventListener('DOMContentLoaded', () => {
-                        // Now we can access the #test element on the other page
-                        const div = page.document.getElementById("alert");
-                        div.innerText(msgs[i]);
-                    })
-                    chrome.tabs.create({ url: "alert.html" , type:"popup"});
+                    alert(msgs[i]);
                 }
                 sendResponse({success: true});
+
+                // let msgs = JSON.parse(request.content);
+                // let len = msgs.length;
+                //
+                // for (let i = 0; i < len; i++) {
+                //     const page = window.open('alert.html')
+                //
+                //     page.addEventListener('DOMContentLoaded', () => {
+                //         // Now we can access the #test element on the other page
+                //         const div = page.document.getElementById("alert");
+                //         div.innerText(msgs[i]);
+                //     })
+                //     chrome.tabs.create({ url: "alert.html" , type:"popup"});
+                // }
+                // sendResponse({success: true});
+            }
+            catch (e) {
+                console.log(e);
+                sendResponse({success: false});
+            }
+        }
+        else if (request.type == 'close') {
+            try {
+                disableChatTextCollecting();
             }
             catch (e) {
                 console.log(e);
@@ -118,25 +153,35 @@ function findChatTextArea() {
     chatTextarea = TextareaCollection[0];
 }
 
-function enableChatTextCollecting() {
-    chatTextareaSubmitBtn = chatTextarea.parentNode.parentNode.parentNode.querySelector("button");
-    chatTextareaSubmitBtn.addEventListener('click', ()=> {
-        console.log("retrieve chat text: " + chatTextarea.value);
-        chrome.runtime.sendMessage({type: 'chatText', num_words: chatTextarea.value.split(' ').length}, function (response) {
+let text = null;
+
+function submitBtn() {
+    chrome.runtime.sendMessage({type: 'chatText', num_words: chatTextarea.value.split(' ').length}, function (response) {
+        console.log(response.success);
+    })
+}
+
+function chatArea(e) {
+    if (e.key !== 'Enter' || e.keyCode !== 13) {
+        text = chatTextarea.value;
+    }
+    if (e.key === 'Enter' || e.keyCode === 13) {
+        chrome.runtime.sendMessage({type: 'chatText', num_words: text.split(' ').length}, function (response) {
             console.log(response.success);
         })
-    });
-    let text = null;
-    chatTextarea.addEventListener('keyup', (e) => {
-        if (e.key !== 'Enter' || e.keyCode !== 13) {
-            text = chatTextarea.value;
-        }
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            chrome.runtime.sendMessage({type: 'chatText', num_words: text.split(' ').length}, function (response) {
-                console.log(response.success);
-            })
-        }
-    })
+    }
+}
+
+function disableChatTextCollecting() {
+    chatTextareaSubmitBtn.removeEventListener('click', submitBtn);
+    chatTextarea.removeEventListener('keyup', chatArea);
+}
+
+function enableChatTextCollecting() {
+    chatTextareaSubmitBtn = chatTextarea.parentNode.parentNode.parentNode.querySelector("button");
+
+    chatTextareaSubmitBtn.addEventListener('click', submitBtn);
+    chatTextarea.addEventListener('keyup', chatArea);
 }
 
 function setCCNotify() {

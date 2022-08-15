@@ -4,4 +4,12 @@ function removeAllChildNodes(parent) {
     }
 }
 
-export {removeAllChildNodes};
+let ConvertStringToHTML = function(str) {
+    let parser = new DOMParser();
+    let doc = parser.parseFromString(str, 'text/html');
+    return doc.body;
+}
+
+
+
+export {removeAllChildNodes, ConvertStringToHTML};

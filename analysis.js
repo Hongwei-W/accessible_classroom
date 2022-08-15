@@ -1,5 +1,5 @@
 import { postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet } from './features/utilitiesREST.js';
-import { removeAllChildNodes } from "./features/utilitiesDOM.js";
+import {ConvertStringToHTML, removeAllChildNodes} from "./features/utilitiesDOM.js";
 import {
     findGetParameter, rateMax, rateMin, rateRange, rateSlow,
     redColors,
@@ -35,6 +35,12 @@ if (!isAdmin) {removeElements(document.getElementsByClassName("admin"));}
 chrome.tabs.sendMessage(tabId, {type: "initialize", expectingStatus: 'on'}, function (response) {
     console.log(response.success);
 });
+
+window.onbeforeunload = function() {
+    chrome.tabs.sendMessage(tabId, {type: "close"}, function (response) {
+        console.log(response.success);
+    })
+}
 
 
 /* speech recognition */
@@ -675,13 +681,25 @@ function arrange_msg(data) {
     }
 
     if (notifications.length !== 0) {
+        console.log(notifications);
+        // for (let i = 0; i < notifications.length; i++) {
+        //     // chrome.runtime.sendMessage({type: 'msg_content', content: notifications[i]}, function (response) {
+        //     //     console.log(response.success);
+        //     // })
+        //     // chrome.runtime.sendMessage({type: 'msg_html'}, function (response) {
+        //     //     console.log(response.success);
+        //     // })
+        //     // alert(notifications[i]);
+        // }
+
         let notificationsJson = JSON.stringify(notifications);
-        chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
-            console.log(response.success);
-        })
-        // chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
+        // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
         //     console.log(response.success);
         // })
+
+        chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
+            console.log(response.success);
+        })
     }
 }
 
