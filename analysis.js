@@ -48,6 +48,7 @@ window.onbeforeunload = function() {
 let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = new SpeechRecognition();
 recognition.lang = 'en-US';
+recognition.continuous = 'true';
 
 let recognitionOn = false;
 

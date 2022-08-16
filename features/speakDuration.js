@@ -65,6 +65,7 @@ function stopStopwatch(length) {
         } else if (val < 50) {
             // not going to tell anything when it is below the threshold
             speechSpeedIndicator.textContent = "";
+            speechSpeedValueDisplay.textContent = "";
 
             meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
             meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
