@@ -571,6 +571,8 @@ let retrieve_msg_from_gsheet = setInterval(function () {
 function msgRetrieveHandler() {
     getHandler(accessible_classroom_message_gsheet)
         .then(function(data){
+            console.log("from msgRetrieveHandler");
+            console.log(data);
             arrange_msg(data);
         })
         .catch(function(error) {
@@ -583,6 +585,7 @@ let speechSpeedFeedbackFadeOut = null;
 let rateFeedback = document.getElementById("rate-feedback");
 let otherFeedback = document.getElementById("other-feedback");
 let lineBreakSpeechSpeed = document.querySelector("#speechSpeed .line-breaker");
+let notificationCenter = document.getElementById("notification-center");
 
 function arrange_msg(data) {
     let len = data.length;
@@ -593,7 +596,7 @@ function arrange_msg(data) {
             continue;
         }
         timestemps.push(data[i][0]);
-        notifications.push(data[i][1]);
+        notifications.push(data[i]);
         if (data[i][1] === "For current speaker: please speak louder.") {
             console.log("adjusting... loud");
             let cur = volumeSoft.indexOf(volumeRange.soft);
@@ -685,8 +688,7 @@ function arrange_msg(data) {
             html.style.setProperty("--slow", (speechRateRange.slow - 60) + "%");
             const meter = document.querySelector("#speechSpeed meter");
             meter.setAttribute("low", speechRateRange.slow);
-            // homemade meter   0304
-
+            // homemade meter
 
             let current = volumeWidthSoft.indexOf(rateRange.slow-60);
             if (current == 0) continue;
@@ -718,6 +720,7 @@ function arrange_msg(data) {
     }
 
     if (notifications.length !== 0) {
+        console.log("notifications about to pop: ");
         console.log(notifications);
         // for (let i = 0; i < notifications.length; i++) {
         //     chrome.runtime.sendMessage({type: 'msg_content', content: notifications[i]}, function (response) {
@@ -737,6 +740,32 @@ function arrange_msg(data) {
         // chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
         //     console.log(response.success);
         // })
+
+        for (let i = 0; i < notifications.length; i++) {
+            let line_breaker = document.createElement("div");
+            if (notificationCenter.childElementCount > 1) {
+               line_breaker.className = "line-breaker";
+            }
+
+            let col_div = document.createElement("div");
+            col_div.className = "etiquette-each";
+            col_div.textContent = notifications[i][1];
+            col_div.style.color = "grey";
+            let time_span = document.createElement("span");
+            time_span.hidden = true;
+            time_span.innerText = notifications[i][0];
+            col_div.appendChild(time_span);
+
+            let icon_div = document.createElement("div");
+            icon_div.className = "etiquette-side"
+
+            notificationCenter.insertBefore(line_breaker, notificationCenter.firstChild);
+            notificationCenter.insertBefore(icon_div, notificationCenter.firstChild);
+            notificationCenter.insertBefore(col_div, notificationCenter.firstChild);
+
+        }
+
+        // notificationTimestamp();
     }
 }
 
@@ -806,3 +835,35 @@ if (isAdmin) {
 //         console.log(response.success);
 //     })
 // })
+
+function notificationTimestamp() {
+    const curTime = new Date();
+    const notifications = notificationCenter.childNodes;
+    console.log(notifications);
+    for (let i = 0; i < notifications.length; i++) {
+        if (notifications[i].className === 'line-breaker' ||  notifications[i].className === '') {
+            continue
+        }
+
+        const notificationTime = new Date(notifications[i].childNodes[1].innerHTML);
+        const timeDiff = curTime - notificationTime;
+        const timeDiffInMinute = Math.floor(timeDiff / (1000*60));
+        console.log("timeDiff", timeDiff);
+        console.log("timeDiffInMinute", timeDiffInMinute);
+
+
+        if (timeDiffInMinute < 2) {
+            notifications[i+1].textContent = "now";
+            notifications[i].style.color = redColors[5];
+            notifications[i+1].style.color = redColors[5];
+        } else {
+            notifications[i+1].textContent = timeDiffInMinute + "min";
+            notifications[i].style.color = "grey";
+            notifications[i+1].style.color = "grey";
+        }
+
+        i += 2;
+    }
+}
+
+window.setInterval(notificationTimestamp, 1000);

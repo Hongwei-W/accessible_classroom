@@ -33,6 +33,6 @@ const accessible_classroom_general_gsheet =
     'https://script.google.com/macros/s/AKfycbxDT1MqjWpLQZYZQ2BkGdyolBg4pK9F4uvtiKK01D_Xkt3ei_bAPf4gB1LDM2q_xPJY/exec';
 
 const accessible_classroom_message_gsheet =
-    'https://script.google.com/macros/s/AKfycbwoCR3wKZlhQbNN24unWFyAxcOSW_zDXkA4AEVzcccJLDIXFO9KhsjY_p5Xyr7WU2s/exec';
+    'https://script.google.com/macros/s/AKfycbxvDCJramfvguFvoFYj8DYctKjH53kObrSMdf-Fkmodjz8E3dUAnd4Liyj8F_Wwhx6z/exec';
 
 export {postHandler, getHandler, formEncoding, accessible_classroom_general_gsheet, accessible_classroom_message_gsheet};
