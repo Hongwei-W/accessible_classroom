@@ -9,12 +9,12 @@ chrome.runtime.onMessage.addListener(
                 if (chatTextarea == null) {findChatTextArea();}
 
                 if (request.expectingStatus == 'on') {
-                    chatTextarea.addEventListener('keypress', chatSpeakNotifyListenerHandler)
+                    chatTextarea.addEventListener('keyup', chatSpeakNotifyListenerHandler)
                     chatTextarea.placeholder("Please keep text chat to a minimum")
                     console.log('chat speak out notification turned on');
                 }
                 else {
-                    chatTextarea.removeEventListener('keypress', chatSpeakNotifyListenerHandler)
+                    chatTextarea.removeEventListener('keyup', chatSpeakNotifyListenerHandler)
                     chatTextarea.placeholder("Send a message to everyone");
                     console.log('chat speak out notification turned off');
                 }
@@ -135,8 +135,8 @@ chrome.runtime.onMessage.addListener(
     }
 );
 
-function chatSpeakNotifyListenerHandler() {
-    alert("Please keep text chat to a minimum. If you have a question or comment, raise your hand and wait to speak.");
+function chatSpeakNotifyListenerHandler(event) {
+    // alert("Please keep text chat to a minimum. If you have a question or comment, raise your hand and wait to speak.");
     // let notifications = new Array();
     // notifications.push("Please speak out what you want to type in chat if it is not personal");
     // let notificationsJson = JSON.stringify(notifications);
@@ -144,6 +144,10 @@ function chatSpeakNotifyListenerHandler() {
     //     console.log('msg retrieve ');
     //     console.log(response.success);
     // })
+
+    if (event.key === 'Enter') {
+
+    }
 }
 
 function findChatTextArea() {
