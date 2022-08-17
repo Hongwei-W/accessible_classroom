@@ -18,6 +18,7 @@ let firstSpeakingPost = true;
 let firstTextPost = true;
 /* a total duration measurement, used to compare with text usage */
 let totalDuration = {'speaking': 0, 'text': 0};
+let durationValues = Array();
 
 function startStopwatch() {
     stopwatch.start();
@@ -38,49 +39,58 @@ function stopStopwatch(length) {
         const midWidth = volumeWidthMid[volumeWidthSoft.indexOf(slowWidth)];
         const fastWidth = volumeWidthLoud[volumeWidthSoft.indexOf(slowWidth)];
 
-        let val = (length/(duration/60000)).toFixed(2);
-        const speechSpeedMeter = document.querySelector('#speechSpeed meter');
-        speechSpeedMeter.value = Math.round(val);
-        const speechSpeedValueDisplay = document.querySelector('#speechSpeed .value');
-        speechSpeedValueDisplay.textContent = val + " WPM";
-        const speechSpeedIndicator = document.querySelector('#speechSpeed #rate-indicator');
-        if (val > speechRateRange.fast) {
-            speechSpeedIndicator.textContent = "too fast";
-            speechSpeedIndicator.style.color = redColors[5];
+        let curVal = (length/(duration/60000)).toFixed(2);
+        if (curVal >= 60) {
+            durationValues.push(parseFloat(curVal));
+            if (durationValues.length > 5) {
+                console.log(durationValues);
+                let val = Math.round(durationValues.reduce((a, b) => a + b, 0) / durationValues.length);
 
-            meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
-            meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
-            meterHigh.setAttribute("style", `width: ${fastWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
-            space[0].setAttribute("style", "width: 1.5% !important");
-            space[1].setAttribute("style", "width: 1.5% !important");
-        } else if (val > speechRateRange.slow) {
-            speechSpeedIndicator.textContent = "just right";
-            speechSpeedIndicator.style.color = "#29CC97";
+                const speechSpeedMeter = document.querySelector('#speechSpeed meter');
+                speechSpeedMeter.value = val;
+                const speechSpeedValueDisplay = document.querySelector('#speechSpeed .value');
+                speechSpeedValueDisplay.textContent = val + " WPM";
+                const speechSpeedIndicator = document.querySelector('#speechSpeed #rate-indicator');
 
-            meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
-            meterMid.setAttribute("style", `width: ${midWidth+3}% !important; height: 15px !important; background-color: #29CC97`);
-            meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
-            space[0].setAttribute("style", "width: 1.5% !important");
-            space[1].setAttribute("style", "width: 1.5% !important");
-        } else if (val < 50) {
-            // not going to tell anything when it is below the threshold
-            speechSpeedIndicator.textContent = "";
-            speechSpeedValueDisplay.textContent = "";
+                if (val > speechRateRange.fast) {
+                    speechSpeedIndicator.textContent = "too fast";
+                    speechSpeedIndicator.style.color = redColors[5];
 
-            meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
-            meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
-            meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
-            space[0].setAttribute("style", "width: 3% !important");
-            space[1].setAttribute("style", "width: 3% !important");
-        } else {
-            speechSpeedIndicator.textContent = "too slow";
-            speechSpeedIndicator.style.color = redColors[5];
+                    meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+                    meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
+                    meterHigh.setAttribute("style", `width: ${fastWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
+                    space[0].setAttribute("style", "width: 1.5% !important");
+                    space[1].setAttribute("style", "width: 1.5% !important");
+                } else if (val > speechRateRange.slow) {
+                    speechSpeedIndicator.textContent = "just right";
+                    speechSpeedIndicator.style.color = "#29CC97";
 
-            meterLow.setAttribute("style", `width: ${slowWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
-            meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
-            meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
-            space[0].setAttribute("style", "width: 1.5% !important");
-            space[1].setAttribute("style", "width: 1.5% !important");
+                    meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+                    meterMid.setAttribute("style", `width: ${midWidth+3}% !important; height: 15px !important; background-color: #29CC97`);
+                    meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+                    space[0].setAttribute("style", "width: 1.5% !important");
+                    space[1].setAttribute("style", "width: 1.5% !important");
+                } else if (val < 50) {
+                    // not going to tell anything when it is below the threshold
+                    speechSpeedIndicator.textContent = "";
+                    speechSpeedValueDisplay.textContent = "";
+
+                    meterLow.setAttribute("style", `width: ${slowWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+                    meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
+                    meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+                    space[0].setAttribute("style", "width: 3% !important");
+                    space[1].setAttribute("style", "width: 3% !important");
+                } else {
+                    speechSpeedIndicator.textContent = "too slow";
+                    speechSpeedIndicator.style.color = redColors[5];
+
+                    meterLow.setAttribute("style", `width: ${slowWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
+                    meterMid.setAttribute("style", `width: ${midWidth}% !important; height: 10px !important; background-color: #29CC9766`);
+                    meterHigh.setAttribute("style", `width: ${fastWidth}% !important; height: 10px !important; background-color: #FEC40066`);
+                    space[0].setAttribute("style", "width: 1.5% !important");
+                    space[1].setAttribute("style", "width: 1.5% !important");
+                }
+            }
         }
     }
     stopwatch.reset();

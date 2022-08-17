@@ -17,11 +17,21 @@
 
 <body>
 <div class="container-fluid">
-
+<!--    <div>-->
+<!--        <i class="fa fa-paper-plane" id="testbtn" aria-hidden="true"></i>-->
+<!--    </div>-->
+<!--    <div class="row section notifications overflow-auto" style="max-height: 50px !important;">-->
+<!--        <div class="col-12">Notifications</div>-->
+<!--        <div class="col-12 notification">first notifications</div>-->
+<!--        <div class="col-12 notification">first notifications</div>-->
+<!--        <div class="col-12 notification">first notifications</div>-->
+<!--        <div class="col-12 notification">first notifications</div>-->
+<!--        <div class="col-12 notification">first notifications</div>-->
+<!--    </div>-->
 
     <div class="row section volume" id="instant">
         <div class="col-12">
-            <span style="width: 50% !important;">Volume</span>&nbsp;
+            <span style="width: 50% !important;">Your Spoken Volume</span>&nbsp;
             <span style="width: 50% !important; font-weight: bold;" id="volume-indicator"></span>
         </div>
         <div class="col-12 sub-title">volume peak within last two seconds: <span class="value"></span></div>
@@ -44,27 +54,7 @@
         </div>
     </div>
 
-    <div class="row section" id="speechSpeed">
-        <div class="col-12">
-            <span style="width: 50% !important;">Speech Speed</span>&nbsp;
-            <span style="width: 50% !important; font-weight: bold;" id="rate-indicator"></span>
-        </div>
-        <div class="sub-title col-12">speech speed average of last sentence: <span class="value"></span></div>
-        <div class="col-12" hidden>
-            <meter min="60" low="80" high="140" max="160" value="0"></meter>
-        </div>
-        <div class="col-12 meter">
-            <div class="suboptimal low"></div><!--
-            --><div class="space" style="width: 3% !important;"></div><!--
-            --><div class="optimal mid"></div><!--
-            --><div class="space"  style="width: 3% !important;"></div><!--
-            --><div class="suboptimal high"></div>
-        </div>
-        <div class="col-12">
-            <i class="fa-solid fa-minus button" id="speak-slower"></i>
-            <i class="fa-solid fa-plus button float-end" id="speak-faster"></i>
-        </div>
-    </div>
+
 
     <div class="row m-0 p-0">
         <div class="col-6 m-0 p-0">
@@ -79,14 +69,44 @@
                     <span class="sub-title toggle-sub-title align-middle">on</span>
                 </div>
             </div>
-        </div>
-        <div class="col-6 m-0 p-0 end-0">
-            <div class="row section right-half">
+
+            <div class="row section left-half">
                 <div class="col-12 text-center">
                     Send Msg<br><span class="sub-title">to all/presenter(s)</span>
                 </div>
                 <div class="col-12 text-center mt-1">
                     <span class="link-like-text" id="customise-msg">customise msg</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 m-0 p-0 end-0">
+            <div class="row section right-half" id="speechSpeed">
+                <div class="col-12 text-center mb-1">
+                    <span style="width: 50% !important;">Speech Speed</span>
+                </div>
+                <div class="sub-title col-12 text-center">your speech speed average in the session: <span class="value">initializing</span></div>
+                <div class="sub-title col-12 text-center mb-1">expected: 80-140</div>
+                <div class="col-12" hidden>
+                    <meter min="60" low="80" high="140" max="160" value="0"></meter>
+                </div>
+                <div class="col-12 text-center">
+                    <span style="width: 50% !important; font-weight: bold;" id="rate-indicator"></span>
+                </div>
+                <div class="col-12 meter" hidden>
+                    <div class="suboptimal low"></div><!--
+            --><div class="space" style="width: 3% !important;"></div><!--
+            --><div class="optimal mid"></div><!--
+            --><div class="space"  style="width: 3% !important;"></div><!--
+            --><div class="suboptimal high"></div>
+                </div>
+                <div class="col-12">
+                    <i class="fa-solid fa-minus button" id="speak-slower"></i>
+                    <i class="fa-solid fa-plus button float-end" id="speak-faster"></i>
+                </div>
+                <div class="line-breaker" hidden></div>
+                <div class="col-12 text-center" id="rate-feedback" hidden>
+                    <span class="sub-title">Others' Feedback</span><br>
+                    <span style="width: 50% !important; font-weight: bold;" id="other-feedback"></span>
                 </div>
             </div>
         </div>

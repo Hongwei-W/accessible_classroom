@@ -10,10 +10,12 @@ chrome.runtime.onMessage.addListener(
 
                 if (request.expectingStatus == 'on') {
                     chatTextarea.addEventListener('keypress', chatSpeakNotifyListenerHandler)
+                    chatTextarea.placeholder("Please keep text chat to a minimum")
                     console.log('chat speak out notification turned on');
                 }
                 else {
                     chatTextarea.removeEventListener('keypress', chatSpeakNotifyListenerHandler)
+                    chatTextarea.placeholder("Send a message to everyone");
                     console.log('chat speak out notification turned off');
                 }
 

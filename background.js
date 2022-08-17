@@ -60,13 +60,25 @@ chrome.runtime.onMessage.addListener(
             }
         }
        else if (request.type === "msg_html") {
-           chrome.windows.create({ url: "alert.html",type: 'popup',  width: 200, height: 100}, function (newWindow) {
-               console.log(newWindow);
-               chrome.scripting.executeScript({
-                   target: {tabId: newWindow.tabs[0].id},
-                   files: ['alert.js']
+           try {
+               chrome.windows.create({ url: "alert.html",type: 'popup',  width: 200, height: 100}, function (newWindow) {
+                   console.log(newWindow);
+                   chrome.scripting.executeScript({
+                       target: {tabId: newWindow.tabs[0].id},
+                       // args: ["some msg"],
+                       // func: (arg1) => {
+                       //     document.getElementById("alert").textContent = arg1;
+                       // }
+                       func: () => {
+                           console.log('hello world');
+                       }
+                   });
                });
-           });
+           }
+           catch (e) {
+               console.log(e);
+               sendResponse({success: false});
+           }
        }
     }
 );

@@ -48,7 +48,7 @@ window.onbeforeunload = function() {
 let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let recognition = new SpeechRecognition();
 recognition.lang = 'en-US';
-recognition.continuous = 'true';
+// recognition.continuous = true;
 
 let recognitionOn = false;
 
@@ -327,7 +327,7 @@ inputEtiquette.addEventListener("keyup", function(event) {
             etiquetteSubmissionHandler();
         }
         else {
-            console.log("fail");
+            console.log("etiquette submit fail because the etiquette is blank");
             inputEtiquette.value = '';
             submitEtiquetteIndicator("cannot submit blank etiquette");
         }
@@ -532,8 +532,8 @@ customiseMsgBtn.addEventListener('click', function() {
                 }, 2000)
             }
             else {
-                console.log("fail");
-                newTextInput.placeholder = 'send failed';
+                console.log("msg submit failed because nothing is entered");
+                newTextInput.placeholder = 'cannot be blank';
             }
         }
     })
@@ -579,6 +579,10 @@ function msgRetrieveHandler() {
 }
 
 let timestemps = new Array();
+let speechSpeedFeedbackFadeOut = null;
+let rateFeedback = document.getElementById("rate-feedback");
+let otherFeedback = document.getElementById("other-feedback");
+let lineBreakSpeechSpeed = document.querySelector("#speechSpeed .line-breaker");
 
 function arrange_msg(data) {
     let len = data.length;
@@ -634,7 +638,7 @@ function arrange_msg(data) {
         }
 
         else if (data[i][1] === "For current speaker: please speak faster.") {
-            console.log("adjusting... fast");
+            // console.log("adjusting... fast");
             let cur = rateSlow.indexOf(speechRateRange.slow);
             // set bar background, and meter low
             if (cur == rateSlow.length - 1) continue;
@@ -651,13 +655,28 @@ function arrange_msg(data) {
             const slowWidth = volumeWidthSoft[current+1];
             const midWidth = volumeWidthMid[current+1];
             const fastWidth = volumeWidthLoud[current+1];
-            console.log(slowWidth, midWidth, fastWidth);
+            // console.log(slowWidth, midWidth, fastWidth);
             rateMeterLow.setAttribute("style", `width: ${slowWidth}% !important;`);
             rateMeterMid.setAttribute("style", `width: ${midWidth}% !important;`);
             rateMeterHigh.setAttribute("style", `width: ${fastWidth}% !important;`);
+
+            if (speechSpeedFeedbackFadeOut){
+                clearTimeout(speechSpeedFeedbackFadeOut);
+                speechSpeedFeedbackFadeOut = null;
+            }
+            rateFeedback.hidden = false;
+            lineBreakSpeechSpeed.hidden = false;
+            otherFeedback.innerText = "Speak Faster";
+            otherFeedback.style.color = redColors[5];
+            speechSpeedFeedbackFadeOut = setTimeout(()=> {
+                otherFeedback.innerText = "";
+                rateFeedback.hidden = true;
+                lineBreakSpeechSpeed.hidden = true;
+            }, 5000);
+
         }
         else if (data[i][1] === "For current speaker: please speak slower.") {
-            console.log("adjusting... slow");
+            // console.log("adjusting... slow");
             let cur = rateSlow.indexOf(speechRateRange.slow);
             // set dot, bar background, and meter low
             if (cur == 0) continue;
@@ -666,7 +685,9 @@ function arrange_msg(data) {
             html.style.setProperty("--slow", (speechRateRange.slow - 60) + "%");
             const meter = document.querySelector("#speechSpeed meter");
             meter.setAttribute("low", speechRateRange.slow);
-            // homemade meter
+            // homemade meter   0304
+
+
             let current = volumeWidthSoft.indexOf(rateRange.slow-60);
             if (current == 0) continue;
             rateRange.slow = volumeWidthSoft[current-1] + rateMin;
@@ -677,6 +698,21 @@ function arrange_msg(data) {
             rateMeterLow.setAttribute("style", `width: ${slowWidth}% !important;`);
             rateMeterMid.setAttribute("style", `width: ${midWidth}% !important;`);
             rateMeterHigh.setAttribute("style", `width: ${fastWidth}% !important;`);
+
+            if (speechSpeedFeedbackFadeOut){
+                clearTimeout(speechSpeedFeedbackFadeOut);
+                speechSpeedFeedbackFadeOut = null;
+            }
+            rateFeedback.hidden = false;
+            lineBreakSpeechSpeed.hidden = false;
+            otherFeedback.innerText = "Speak Slower";
+            otherFeedback.style.color = redColors[5];
+            speechSpeedFeedbackFadeOut = setTimeout(()=> {
+                otherFeedback.innerText = "";
+                rateFeedback.hidden = true;
+                lineBreakSpeechSpeed.hidden = true;
+            }, 5000);
+
         }
 
     }
@@ -684,23 +720,23 @@ function arrange_msg(data) {
     if (notifications.length !== 0) {
         console.log(notifications);
         // for (let i = 0; i < notifications.length; i++) {
-        //     // chrome.runtime.sendMessage({type: 'msg_content', content: notifications[i]}, function (response) {
-        //     //     console.log(response.success);
-        //     // })
+        //     chrome.runtime.sendMessage({type: 'msg_content', content: notifications[i]}, function (response) {
+        //         console.log(response.success);
+        //     })
         //     // chrome.runtime.sendMessage({type: 'msg_html'}, function (response) {
         //     //     console.log(response.success);
         //     // })
         //     // alert(notifications[i]);
         // }
 
-        let notificationsJson = JSON.stringify(notifications);
+        // let notificationsJson = JSON.stringify(notifications);
         // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
         //     console.log(response.success);
         // })
 
-        chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
-            console.log(response.success);
-        })
+        // chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
+        //     console.log(response.success);
+        // })
     }
 }
 
@@ -764,3 +800,9 @@ if (isAdmin) {
             .then(() => {})
     }, 5000)
 }
+
+// document.getElementById('testbtn').addEventListener('click', ()=> {
+//     chrome.runtime.sendMessage({type: 'msg_html'}, function (response) {
+//         console.log(response.success);
+//     })
+// })
