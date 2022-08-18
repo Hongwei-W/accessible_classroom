@@ -1,6 +1,7 @@
 let chatTextarea = null;
 let chatTextareaSubmitBtn = null;
 let cc_notify = null;
+let notificationCenter = null;
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
@@ -10,12 +11,12 @@ chrome.runtime.onMessage.addListener(
 
                 if (request.expectingStatus == 'on') {
                     chatTextarea.addEventListener('keyup', chatSpeakNotifyListenerHandler)
-                    chatTextarea.placeholder("Please keep text chat to a minimum")
+                    chatTextarea.placeholder = "Please keep text chat to a minimum";
                     console.log('chat speak out notification turned on');
                 }
                 else {
                     chatTextarea.removeEventListener('keyup', chatSpeakNotifyListenerHandler)
-                    chatTextarea.placeholder("Send a message to everyone");
+                    chatTextarea.placeholder = "Send a message to everyone";
                     console.log('chat speak out notification turned off');
                 }
 
@@ -81,6 +82,7 @@ chrome.runtime.onMessage.addListener(
                     /* bind a listener to "send" button, wait for page to load*/
                     findChatTextArea();
                     enableChatTextCollecting();
+                    alterMessageToNotificationCenter();
 
                     const chatCloseBtn = document.querySelector('[aria-label="Close"]');
                     if (chatCloseBtn) chatCloseBtn.parentNode.removeChild(chatCloseBtn);
@@ -102,21 +104,6 @@ chrome.runtime.onMessage.addListener(
                     alert(msgs[i]);
                 }
                 sendResponse({success: true});
-
-                // let msgs = JSON.parse(request.content);
-                // let len = msgs.length;
-                //
-                // for (let i = 0; i < len; i++) {
-                //     const page = window.open('alert.html')
-                //
-                //     page.addEventListener('DOMContentLoaded', () => {
-                //         // Now we can access the #test element on the other page
-                //         const div = page.document.getElementById("alert");
-                //         div.innerText(msgs[i]);
-                //     })
-                //     chrome.tabs.create({ url: "alert.html" , type:"popup"});
-                // }
-                // sendResponse({success: true});
             }
             catch (e) {
                 console.log(e);
@@ -136,17 +123,26 @@ chrome.runtime.onMessage.addListener(
 );
 
 function chatSpeakNotifyListenerHandler(event) {
-    // alert("Please keep text chat to a minimum. If you have a question or comment, raise your hand and wait to speak.");
-    // let notifications = new Array();
-    // notifications.push("Please speak out what you want to type in chat if it is not personal");
-    // let notificationsJson = JSON.stringify(notifications);
-    // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
-    //     console.log('msg retrieve ');
-    //     console.log(response.success);
-    // })
-
     if (event.key === 'Enter') {
+        try {
+            window.setTimeout(()=> {
+                const newNode = notificationCenter.lastChild.cloneNode(true);
+                newNode.setAttribute('data-sender-id', 'accessible-classroom-extension');
+                newNode.firstChild.firstChild.textContent = 'Accessible Classroom Chrome Extension';
+                let newMsgNode = newNode.childNodes[1].firstChild.cloneNode(false);
+                newMsgNode.textContent = 'Please keep text chat to a minimum. If you have a question or comment, raise your hand and wait to speak.';
+                newMsgNode.style.fontSize = '1.5em !important';
+                let newBracketNode = newNode.childNodes[1].cloneNode(false);
+                newNode.childNodes[1].remove()
+                newBracketNode.appendChild(newMsgNode);
+                newNode.appendChild(newBracketNode);
 
+                notificationCenter.append(newNode);
+            }, 2000);
+        }
+        catch (e) {
+            console.log(e);
+        }
     }
 }
 
@@ -181,6 +177,11 @@ function chatArea(e) {
 function disableChatTextCollecting() {
     chatTextareaSubmitBtn.removeEventListener('click', submitBtn);
     chatTextarea.removeEventListener('keyup', chatArea);
+    chatTextarea.removeEventListener('keyup', chatSpeakNotifyListenerHandler);
+    chatTextarea.placeholder = "Send a message to everyone";
+    if (cc_notify) {
+        clearInterval(cc_notify);
+    }
 }
 
 function enableChatTextCollecting() {
@@ -195,8 +196,43 @@ function setCCNotify() {
         const captionOnBtn = document.querySelector('[aria-label*="on captions"]');
 
         if (captionOnBtn) {
-            alert("Make the meeting experience better for everyone by turning on captions. Click CC button at the bottom of the screen.");
+            chrome.runtime.sendMessage({type: "cc_notification", msg: "Make the meeting experience better for everyone by turning on captions. Click CC button at the bottom of the screen."}, function (response) {
+                console.log(response.success);
+            })
         }
     }, 120000);
 }
 
+function alterMessageToNotificationCenter() {
+    let xpath = "//div[text()='In-call messages']";
+    let centerTitle = document.evaluate(xpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+
+    let possibleCenter = document.querySelectorAll('[aria-live="polite"]');
+    console.log(possibleCenter);
+    let index = 0;
+    for (; index < possibleCenter.length; index++) {
+        if (findChild(centerTitle.parentElement.parentElement, possibleCenter[index])) {
+            break;
+        }
+    }
+    notificationCenter = possibleCenter[index];
+    console.log(notificationCenter);
+}
+
+function findChild(node, asked) {
+    if (node == asked) {
+        return true
+    }
+    if (node.childNodes == null){
+        return false
+    }
+    let found = false;
+    for (let i = 0; i < node.childNodes.length; i++) {
+        let val = findChild(node.childNodes[i], asked);
+        if (val == true) {
+            found = true;
+            break;
+        }
+    }
+    return found
+}

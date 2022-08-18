@@ -205,11 +205,21 @@ function arrangeSpeakingDuration(data, flip) {
     }
 
     let lastSpeakers = data.lastSpeakers;
+    console.log(lastSpeakers);
     let title_spans = document.getElementsByClassName("title");
+    console.log(title_spans);
     let counter = 0;
     for (let j = 0; j < title_spans.length && counter < 3; j++) {
-        if (title_spans[j].textContent == lastSpeakers[counter][0] && title_spans[j].style.backgroundColor == '') {
-            title_spans[j].style.backgroundColor = themeGreen + opacity[counter];
+        if (title_spans[j].textContent == lastSpeakers[0][0] && title_spans[j].style.backgroundColor == '') {
+            title_spans[j].style.backgroundColor = themeGreen + opacity[0];
+            counter += 1
+        }
+        else if (title_spans[j].textContent == lastSpeakers[1][0] && title_spans[j].style.backgroundColor == '') {
+            title_spans[j].style.backgroundColor = themeGreen + opacity[1];
+            counter += 1
+        }
+        else if (title_spans[j].textContent == lastSpeakers[2][0] && title_spans[j].style.backgroundColor == '') {
+            title_spans[j].style.backgroundColor = themeGreen + opacity[2];
             counter += 1
         }
     }

@@ -404,6 +404,7 @@ function arrangeEtiquette(data) {
             pendingEtiquetteRow.append(col_div, icon_div, line_breaker);
             icon_approve.addEventListener('click', function (){
                 clickTickXUpvoteHandler(icon_approve, 'approve');
+                msgSubmissionHandler(col_div.textContent);
             });
             icon_reject.addEventListener('click', function (){
                 clickTickXUpvoteHandler(icon_reject, 'reject');
@@ -450,6 +451,7 @@ function arrangeEtiquette(data) {
         approvedEtiquetteRow.insertBefore(etiquette_div, approvedEtiquetteRow.firstChild);
         icon.addEventListener('click', function (){
             clickTickXUpvoteHandler(icon, 'vote');
+            msgSubmissionHandler(etiquette_div.textContent);
         });
     }
 
@@ -474,15 +476,6 @@ function clickTickXUpvoteHandler(node, operation) {
         .catch(function (error) {
             console.log((error))
         })
-
-    if (operation === "approve" || operation === "vote") {
-        let notifications = new Array();
-        notifications.push(inputEtiquette.textContent);
-        let notificationsJson = JSON.stringify(notifications);
-        chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
-            console.log(response.success);
-        })
-    }
 }
 
 /* message submission */
@@ -571,8 +564,6 @@ let retrieve_msg_from_gsheet = setInterval(function () {
 function msgRetrieveHandler() {
     getHandler(accessible_classroom_message_gsheet)
         .then(function(data){
-            console.log("from msgRetrieveHandler");
-            console.log(data);
             arrange_msg(data);
         })
         .catch(function(error) {
@@ -582,10 +573,14 @@ function msgRetrieveHandler() {
 
 let timestemps = new Array();
 let speechSpeedFeedbackFadeOut = null;
+let volumeFeedbackFadeOut = null;
 let rateFeedback = document.getElementById("rate-feedback");
 let otherFeedback = document.getElementById("other-feedback");
 let lineBreakSpeechSpeed = document.querySelector("#speechSpeed .line-breaker");
 let notificationCenter = document.getElementById("notification-center");
+let volumeRateFeedback = document.getElementById("volume-rate-feedback");
+let volumeOtherFeedback =  document.getElementById("volume-other-feedback");
+// let lineBreakVolume = document.querySelector("#instant .line-breaker");
 
 function arrange_msg(data) {
     let len = data.length;
@@ -617,6 +612,18 @@ function arrange_msg(data) {
             volumeMeterLow.setAttribute("style", `width: ${volumeWidth.soft}% !important;`);
             volumeMeterMid.setAttribute("style", `width: ${volumeWidth.mid}% !important;`);
             volumeMeterHigh.setAttribute("style", `width: ${volumeWidth.loud}% !important;`);
+
+            if (volumeFeedbackFadeOut){
+                clearTimeout(volumeFeedbackFadeOut);
+                volumeFeedbackFadeOut = null;
+            }
+            volumeRateFeedback.textContent = "Others' Feedback";
+            volumeOtherFeedback.innerText = "Speak Louder";
+            volumeOtherFeedback.style.color = redColors[5];
+            volumeFeedbackFadeOut = setTimeout(()=> {
+                volumeOtherFeedback.innerText = "";
+                volumeRateFeedback.textContent = "";
+            }, 5000);
         }
         else if (data[i][1] === "For current speaker: please speak softer.") {
             console.log("adjusting... soft");
@@ -638,8 +645,19 @@ function arrange_msg(data) {
             volumeMeterLow.setAttribute("style", `width: ${volumeWidth.soft}% !important;`);
             volumeMeterMid.setAttribute("style", `width: ${volumeWidth.mid}% !important;`);
             volumeMeterHigh.setAttribute("style", `width: ${volumeWidth.loud}% !important;`);
-        }
 
+            if (volumeFeedbackFadeOut){
+                clearTimeout(volumeFeedbackFadeOut);
+                volumeFeedbackFadeOut = null;
+            }
+            volumeRateFeedback.textContent = "Others' Feedback";
+            volumeOtherFeedback.innerText = "Speak Softer";
+            volumeOtherFeedback.style.color = redColors[5];
+            volumeFeedbackFadeOut = setTimeout(()=> {
+                volumeOtherFeedback.innerText = "";
+                volumeRateFeedback.textContent = "";
+            }, 5000);
+        }
         else if (data[i][1] === "For current speaker: please speak faster.") {
             // console.log("adjusting... fast");
             let cur = rateSlow.indexOf(speechRateRange.slow);
@@ -720,53 +738,34 @@ function arrange_msg(data) {
     }
 
     if (notifications.length !== 0) {
-        console.log("notifications about to pop: ");
-        console.log(notifications);
-        // for (let i = 0; i < notifications.length; i++) {
-        //     chrome.runtime.sendMessage({type: 'msg_content', content: notifications[i]}, function (response) {
-        //         console.log(response.success);
-        //     })
-        //     // chrome.runtime.sendMessage({type: 'msg_html'}, function (response) {
-        //     //     console.log(response.success);
-        //     // })
-        //     // alert(notifications[i]);
-        // }
-
-        // let notificationsJson = JSON.stringify(notifications);
-        // chrome.runtime.sendMessage({type: 'msg', content: notificationsJson}, function (response) {
-        //     console.log(response.success);
-        // })
-
-        // chrome.tabs.sendMessage(tabId, {type: 'alert', content: notificationsJson}, function (response) {
-        //     console.log(response.success);
-        // })
-
         for (let i = 0; i < notifications.length; i++) {
-            let line_breaker = document.createElement("div");
-            if (notificationCenter.childElementCount > 1) {
-               line_breaker.className = "line-breaker";
-            }
-
-            let col_div = document.createElement("div");
-            col_div.className = "etiquette-each";
-            col_div.textContent = notifications[i][1];
-            col_div.style.color = "grey";
-            let time_span = document.createElement("span");
-            time_span.hidden = true;
-            time_span.innerText = notifications[i][0];
-            col_div.appendChild(time_span);
-
-            let icon_div = document.createElement("div");
-            icon_div.className = "etiquette-side"
-
-            notificationCenter.insertBefore(line_breaker, notificationCenter.firstChild);
-            notificationCenter.insertBefore(icon_div, notificationCenter.firstChild);
-            notificationCenter.insertBefore(col_div, notificationCenter.firstChild);
-
+            addNotification(notifications[i]);
         }
 
-        // notificationTimestamp();
     }
+}
+
+function addNotification(notification) {
+    let line_breaker = document.createElement("div");
+    if (notificationCenter.childElementCount > 1) {
+        line_breaker.className = "line-breaker";
+    }
+
+    let col_div = document.createElement("div");
+    col_div.className = "etiquette-each";
+    col_div.textContent = notification[1];
+    col_div.style.color = "grey";
+    let time_span = document.createElement("span");
+    time_span.hidden = true;
+    time_span.innerText = notification[0];
+    col_div.appendChild(time_span);
+
+    let icon_div = document.createElement("div");
+    icon_div.className = "etiquette-side"
+
+    notificationCenter.insertBefore(line_breaker, notificationCenter.firstChild);
+    notificationCenter.insertBefore(icon_div, notificationCenter.firstChild);
+    notificationCenter.insertBefore(col_div, notificationCenter.firstChild);
 }
 
 /* listeners -- from contentScript or background script */
@@ -784,6 +783,14 @@ chrome.runtime.onMessage.addListener(
             catch (e) {
                 console.log(e);
                 sendResponse({success: false});
+            }
+        }
+        else if (request.type === "cc_notification") {
+            try {
+                addNotification([new Date(), request.msg]);
+            }
+            catch (e) {
+                console.log(e);
             }
         }
     }
@@ -839,7 +846,6 @@ if (isAdmin) {
 function notificationTimestamp() {
     const curTime = new Date();
     const notifications = notificationCenter.childNodes;
-    console.log(notifications);
     for (let i = 0; i < notifications.length; i++) {
         if (notifications[i].className === 'line-breaker' ||  notifications[i].className === '') {
             continue
@@ -848,14 +854,16 @@ function notificationTimestamp() {
         const notificationTime = new Date(notifications[i].childNodes[1].innerHTML);
         const timeDiff = curTime - notificationTime;
         const timeDiffInMinute = Math.floor(timeDiff / (1000*60));
-        console.log("timeDiff", timeDiff);
-        console.log("timeDiffInMinute", timeDiffInMinute);
 
-
-        if (timeDiffInMinute < 2) {
-            notifications[i+1].textContent = "now";
+        if (timeDiffInMinute < 1) {
+            notifications[i + 1].textContent = "now";
             notifications[i].style.color = redColors[5];
-            notifications[i+1].style.color = redColors[5];
+            notifications[i + 1].style.color = redColors[5];
+
+        }else if (timeDiffInMinute < 2) {
+            notifications[i+1].textContent = "1 min";
+            notifications[i].style.color = redColors[4];
+            notifications[i+1].style.color = redColors[4];
         } else {
             notifications[i+1].textContent = timeDiffInMinute + "min";
             notifications[i].style.color = "grey";

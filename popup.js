@@ -42,7 +42,7 @@ function notGoogleMeet() {
 join_btn.addEventListener('click', function (){
     if (validateWelcomeForm()) {
         let name = document.forms['welcomeForm']['name'].value;
-        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabInfo['tabId'],'result','width=370px, height=700px');
+        window.open('./analysis.html?name='+name+'&admin=false&tabId=' + tabInfo['tabId'],'result','width=400px, height=700px');
         window.close();
         // document.getElementById('welcomeForm').submit();
     }

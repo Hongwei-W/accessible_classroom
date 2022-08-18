@@ -11,5 +11,4 @@ let ConvertStringToHTML = function(str) {
 }
 
 
-
 export {removeAllChildNodes, ConvertStringToHTML};
