@@ -103,7 +103,26 @@ function validateJoinForm() {
     }
     if (username == "admin" && password == "1234") {
         return true;
-    } else {
+    }
+    else if (username == 'host1' && password == 'ftezegk0o0') {
+        return true
+    }
+    else if (username == 'host2' && password == '35j0s41e8g') {
+        return true
+    }
+    else if (username == 'host3' && password == "ybrl4wig8d") {
+        return true
+    }
+    else if (username == 'cohost1' && password == 'amnh5qhlcq') {
+        return true
+    }
+    else if (username == 'cohost2' && password == '3l3xuz677q') {
+        return true
+    }
+    else if (username == 'cohost3' && password == 'bnuj1ernlg') {
+        return true
+    }
+    else {
         alert("wrong username or password");
         return false;
     }
