@@ -25,7 +25,8 @@ let opacity = ["CC", "99", "66"]
 let WPM = {'slow': 100, 'average': 130, 'fast': 160};
 let volumeRange = {"soft": 0.2, "loud": 0.8};
 let volumeWidth = {"soft": 20, "mid": 54, "loud": 20};
-let volumeSoft = [0.16, 0.18, 0.2, 0.22, 0.24, 0.26, 0.28, 0.3];
+let volumeSoft = [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35];
+let volumeLoud = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65]
 let volumeWidthSoft = [5, 10, 15, 20, 25, 30, 35];
 let volumeWidthMid = [54, 54, 54, 54, 54, 54, 54];
 let volumeWidthLoud = [35, 30, 25, 20, 15, 10, 5];
@@ -37,4 +38,4 @@ let rateRange = {"slow": 80, "fast": 140};
 let rateMin = 60;
 let rateMax = 160;
 
-export {findGetParameter, removeElements, redColors, greenColors, themeGreen, opacity, WPM, volumeRange, speechRateRange, volumeSoft, volumeWidthSoft, volumeWidthMid, volumeWidthLoud, volumeSoftDot, volumeWidth, rateSlow, rateRange, rateMax, rateMin};
+export {findGetParameter, removeElements, redColors, greenColors, themeGreen, opacity, WPM, volumeRange, speechRateRange, volumeSoft, volumeWidthSoft, volumeWidthMid, volumeWidthLoud, volumeSoftDot, volumeWidth, rateSlow, rateRange, rateMax, rateMin, volumeLoud};

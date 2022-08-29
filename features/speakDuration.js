@@ -51,8 +51,8 @@ function stopStopwatch(length) {
                 const speechSpeedValueDisplay = document.querySelector('#speechSpeed .value');
                 speechSpeedValueDisplay.textContent = val + " WPM";
                 const speechSpeedIndicator = document.querySelector('#speechSpeed #rate-indicator');
-
-                if (val > speechRateRange.fast) {
+                // if (val > speechRateRange.fast) {
+                if (val > 140) {
                     speechSpeedIndicator.textContent = "too fast";
                     speechSpeedIndicator.style.color = redColors[5];
 
@@ -61,7 +61,8 @@ function stopStopwatch(length) {
                     meterHigh.setAttribute("style", `width: ${fastWidth+3}% !important; height: 15px !important; background-color: #FEC400`);
                     space[0].setAttribute("style", "width: 1.5% !important");
                     space[1].setAttribute("style", "width: 1.5% !important");
-                } else if (val > speechRateRange.slow) {
+                // } else if (val > speechRateRange.slow) {
+                } else if (val > 80) {
                     speechSpeedIndicator.textContent = "just right";
                     speechSpeedIndicator.style.color = "#29CC97";
 

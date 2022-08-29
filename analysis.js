@@ -3,7 +3,7 @@ import {ConvertStringToHTML, removeAllChildNodes} from "./features/utilitiesDOM.
 import {
     findGetParameter, rateMax, rateMin, rateRange, rateSlow,
     redColors,
-    removeElements, speechRateRange,
+    removeElements, speechRateRange, volumeLoud,
     volumeRange,
     volumeSoft,
     volumeSoftDot, volumeWidth, volumeWidthLoud, volumeWidthMid, volumeWidthSoft,
@@ -586,6 +586,9 @@ function arrange_msg(data) {
     let len = data.length;
     let notifications = new Array();
     for (let i = 1; i < len; i++) {
+        if (data[i] == null || data[i][0] == null) {
+            continue;
+        }
         let timestamp = data[i][0];
         if (timestemps.includes(timestamp)) {
             continue;
@@ -598,11 +601,13 @@ function arrange_msg(data) {
             // set dot, bar background, and meter low
             if (cur == volumeSoft.length - 1) continue;
             volumeRange.soft = volumeSoft[cur+1];
-            const html = document.getElementsByTagName("html")[0];
-            html.style.setProperty("--soft", volumeRange.soft * 100 + "%");
-            const meter = document.querySelector("#instant meter");
-            meter.setAttribute("low", volumeRange.soft);
-            html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+            volumeRange.loud = volumeLoud[cur+1];
+            // const html = document.getElementsByTagName("html")[0];
+            // html.style.setProperty("--soft", volumeRange.soft * 100 + "%");
+            // const meter = document.querySelector("#instant meter");
+            // meter.setAttribute("low", volumeRange.soft);
+            // html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+
             // homemade meter
             let current = volumeWidthSoft.indexOf(volumeWidth.soft);
             if (current == volumeWidthSoft.length - 1) continue;
@@ -631,11 +636,13 @@ function arrange_msg(data) {
             // set dot, bar background, and meter low
             if (cur == 0) continue;
             volumeRange.soft = volumeSoft[cur-1];
-            const html = document.getElementsByTagName("html")[0];
-            html.style.setProperty("--soft", volumeRange.soft * 100 + "%");
-            const meter = document.querySelector("#instant meter");
-            meter.setAttribute("low", volumeRange.soft);
-            html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+            volumeRange.loud = volumeLoud[cur-1];
+            // const html = document.getElementsByTagName("html")[0];
+            // html.style.setProperty("--soft", volumeRange.soft * 100 + "%");
+            // const meter = document.querySelector("#instant meter");
+            // meter.setAttribute("low", volumeRange.soft);
+            // html.style.setProperty("--dot", volumeSoftDot[volumeRange.soft]);
+
             // homemade meter
             let current = volumeWidthSoft.indexOf(volumeWidth.soft);
             if (current == 0) continue;
@@ -850,8 +857,15 @@ function notificationTimestamp() {
         if (notifications[i].className === 'line-breaker' ||  notifications[i].className === '') {
             continue
         }
-
-        const notificationTime = new Date(notifications[i].childNodes[1].innerHTML);
+        if (notifications[i].childNodes[1] == null) {
+            continue
+        }
+        let notificationTime = null;
+        try {
+            notificationTime = new Date(notifications[i].childNodes[1].innerText);
+        } catch (e) {
+            console.log(e);
+        }
         const timeDiff = curTime - notificationTime;
         const timeDiffInMinute = Math.floor(timeDiff / (1000*60));
 
