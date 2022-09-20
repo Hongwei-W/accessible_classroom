@@ -535,11 +535,13 @@ customiseMsgBtn.addEventListener('click', function() {
 function msgSubmissionHandler(msg) {
     console.log('start submit ' + msg);
     let details = {
+        'operation': 'submit',
+        'sheet': 'message',
         'msg': msg
     }
     let formBody = formEncoding(details);
 
-    postHandler(accessible_classroom_message_gsheet, formBody)
+    postHandler(accessible_classroom_general_gsheet, formBody)
         .then(function(data){
             console.log(data);
             const statusIndicateMsg = 'Post succeeded';
@@ -562,7 +564,7 @@ let retrieve_msg_from_gsheet = setInterval(function () {
 // })
 
 function msgRetrieveHandler() {
-    getHandler(accessible_classroom_message_gsheet)
+    getHandler(accessible_classroom_general_gsheet + '?sheet=message')
         .then(function(data){
             arrange_msg(data);
         })
